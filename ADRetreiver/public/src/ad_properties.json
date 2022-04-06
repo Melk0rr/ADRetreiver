@@ -1,0 +1,32 @@
+[
+  {
+    "type": "user",
+    "initial": ["Created", "Description", "Title", "EmailAddress", "LastLogonDate", "Modified", "PasswordLastSet", "PasswordNotRequired", "PasswordNeverExpires"],
+    "final": ["DistinguishedName","SAN","SID","Name","Surname","GivenName","Email","Status","AccountType","Permissions","CreationDate","LastChangeDate","PasswordNotRequired","PasswordNeverExpires","PasswordLastSet","PasswordLastSetDelta","PasswordShouldBeReset","LastLogonDate","LastLogonDelta","ActivityPeriod","Active (30d)","Active (90d)","Active (180d)","Active (360d)","Health","HealthFlags","Title","Description"]
+  },
+  {
+    "type": "computer",
+    "initial": ["LastLogonDate", "Created", "Modified", "OperatingSystem", "OperatingSystemVersion", "IPV4Address", "PasswordLastSet", "PasswordNotRequired", "PasswordNeverExpires", "Description"],
+    "final": ["DistinguishedName","SAN","SID","Name","Status","ComputerType","OSFamily","OSShort","OSFull","OSEdition","OSVersion","OSBuild","@IPv4","HasExtendedSupport","Support","CreationDate","LastChangeDate","PasswordNotRequired","PasswordNeverExpires","PasswordLastSet","PasswordLastSetDelta","PasswordShouldBeReset","LastLogonDate","LastLogonDelta","ActivityPeriod","Active (30d)","Active (90d)","Active (180d)","Active (360d)","Health","HealthFlags","Description"]
+  },
+  {
+    "type": "group",
+    "initial": ["CN", "Created", "Modified", "Description", "MemberOf"],
+    "final": ["CN", "CreationDate", "LastChangeDate", "MemberOf", "Description"]
+  },
+  {
+    "type": "gpo",
+    "initial": [],
+    "final": ["Name","Id","DomainName","Owner","ImpactedOUs","CreationTime","ModificationTime","Description"]
+  },
+  {
+    "type": "ou",
+    "initial": ["Created", "Modified", "Description", "GPLink"],
+    "final": ["DistinguishedName","Name","Created","Modified","Users","Computers","SubOUs","GPLink","Description"]
+  },
+  {
+    "type": "object",
+    "initial": ["Created", "Modified", "Description"],
+    "final": []
+  }
+]
