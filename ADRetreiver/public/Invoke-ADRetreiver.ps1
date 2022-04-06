@@ -44,29 +44,28 @@
     catch { Write-Error "Sorry but I can't find any domain..." }
 
     Write-Host "If my scent is right, we are on $domainRoot domain !" -f DarkYellow
-    Write-Host "I have to inspect $($Leads.length) lead(s)..." -f DarkYellow
-
-    # Retreive data from Active Directory
-    $exploredLeads = @()
-    foreach ($lead in $Leads) {
-      $time = Measure-Command { $updLead = Initialize-Lead -Lead $lead -Domain $domainRoot }
-
-      Write-Host "Inspection took $($time.Seconds).$($time.Milliseconds)s !" -f DarkYellow
-      $exploredLeads += $updLead
-    }
-
-    $completedLeads = @()
-
-    Write-Host "I have to gather my discoveries for $($exploredLeads.length) lead(s)..." -f DarkYellow
   }
 
   PROCESS {
-    foreach ($lead in $exploredLeads) {
-      $time = Measure-Command { $completedLeads += Complete-Lead -Lead $lead }
-      Write-Host "Gathering took $($time.Seconds).$($time.Milliseconds)s !" -f DarkYellow
+    Write-Host "I have to inspect $($Leads.length) lead(s)..." -f DarkYellow
+
+    # Retreive data
+    $exploredLeads = @()
+    foreach ($lead in $Leads) {
+      $time = Measure-Command { $exploredLeads += Initialize-Lead -Lead $lead -Domain $domainRoot }
+      Write-Host "Inspection took $($time.Minutes * 60 + $time.Seconds).$($time.Milliseconds)s !" -f DarkYellow
     }
 
-    Write-Host "I'm done exploring all leads !" -f DarkYellow
+    Write-Host "I have to gather my discoveries for $($exploredLeads.length) lead(s)..." -f DarkYellow
+
+    # Gather data
+    $completedLeads = @()
+    foreach ($lead in $exploredLeads) {
+      $time = Measure-Command { $completedLeads += Complete-Lead -Lead $lead }
+      Write-Host "Gathering took $($time.Minutes * 60 + $time.Seconds).$($time.Milliseconds)s !" -f DarkYellow
+    }
+
+    Write-Host "I'm done exploring all leads !" -f Green
   }
 
   END {
