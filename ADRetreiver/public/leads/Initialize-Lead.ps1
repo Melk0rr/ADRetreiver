@@ -29,7 +29,23 @@ function Initialize-Lead {
       ValueFromPipelineByPropertyName = $false
     )]
     [ValidateNotNullOrEmpty()]
-    [string]  $Domain
+    [string]  $Domain,
+
+    [Parameter(
+      Mandatory = $false,
+      ValueFromPipeline = $false,
+      ValueFromPipelineByPropertyName = $false
+    )]
+    [ValidateNotNullOrEmpty()]
+    [int]  $Timeout = 300,
+
+    [Parameter(
+      Mandatory = $false,
+      ValueFromPipeline = $false,
+      ValueFromPipelineByPropertyName = $false
+    )]
+    [ValidateNotNullOrEmpty()]
+    [int]  $WaitStep = 5
   )
 
   BEGIN {
@@ -82,17 +98,23 @@ function Initialize-Lead {
     } -ArgumentList $Lead, $params -Name ADReq
 
     # Waiting indicator
-    while ($job.State -ne "Completed") {
+    while ("Completed", "Failed" -notcontains $job.State) {
       Write-Host '.' -NoNewline -ForegroundColor DarkYellow
-      Start-Sleep -Seconds 5
+
+      # If timeout is reached, cancel
+      $Timeout -= $WaitStep
+      if ($Timeout -le 0) { throw "Uhh it's taking me too much time... Better continue." }
+
+      Start-Sleep -Seconds $waitStep
     }
 
     $Lead.Data = [array]($job | Wait-Job | Receive-Job)
 
-    $foundMsg = "I found $($Lead.Data.length) $($Lead.Type)(s) !"
-    if ($Lead.Data.length -eq 0) { "Sorry, I could not find any $($Lead.Type)..." }
+    # Change message depending on result
+    $foundMsg = if ($Lead.Data.length -eq 0) { @{msg="Sorry, I could not find any $($Lead.Type)..."; f='Red'} }
+    else { @{msg="I found $($Lead.Data.length) $($Lead.Type)(s) !"; f='Green'} }
 
-    Write-Host $foundMsg -f DarkYellow
+    Write-Host @foundMsg
   }
 
   END { return $Lead }
