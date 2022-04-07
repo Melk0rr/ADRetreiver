@@ -32,8 +32,7 @@ function Complete-Lead {
   }
 
   PROCESS {
-    foreach ($object in $Lead.Data) {
-
+    $res += foreach ($object in $Lead.Data) {
       $name = if ($type -eq "gpo") { $object.DisplayName } else { $object.Name }
 
       # Progress
@@ -42,17 +41,14 @@ function Complete-Lead {
 
       # Calling appropriate properties formatting function depending on the object type
       try {
-        $props = switch ($type) {
+        switch ($type) {
           "group" { Get-GroupDetails -Group $object }
           "gpo"   { Get-GPODetails -GPO $object }
           "ou"    { Get-OUDetails -OU $object }
           default { Get-AccountDetails -Account $object -Type $type }
         }
-
-        $res += $props
       }
       catch { Write-Error "Something went wrong for $type n°$index : $name`n$_" }
-      finally { $props = $null }
 
       $index++
     }

@@ -108,7 +108,7 @@ function Initialize-Lead {
       Start-Sleep -Seconds $waitStep
     }
 
-    $Lead.Data = [array]($job | Wait-Job | Receive-Job)
+    $Lead.Data = [array](Receive-Job $job -Wait)
 
     # Change message depending on result
     $foundMsg = if ($Lead.Data.length -eq 0) { @{msg="Sorry, I could not find any $($Lead.Type)..."; f='Red'} }
