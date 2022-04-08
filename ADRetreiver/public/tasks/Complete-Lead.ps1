@@ -54,8 +54,7 @@ function Complete-Lead {
     }
 
     Write-Progress -Activity "I'm done gathering details !" -Status "100% completed..." -PercentComplete 100
-    $Lead.Data = $res
   }
 
-  END { return $Lead }
+  END { return $res }
 }

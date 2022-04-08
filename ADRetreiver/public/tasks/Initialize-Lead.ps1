@@ -49,7 +49,6 @@ function Initialize-Lead {
   )
 
   BEGIN {
-    Write-Host "I'm on a lead !" -f DarkYellow
 
     # Checking if a correct Type value has been provided
     if (!$Lead.Type) { throw "I don't know what I'm looking for..." }
@@ -108,14 +107,8 @@ function Initialize-Lead {
       Start-Sleep -Seconds $waitStep
     }
 
-    $Lead.Data = [array](Receive-Job $job -Wait)
-
-    # Change message depending on result
-    $foundMsg = if ($Lead.Data.length -eq 0) { @{msg="Sorry, I could not find any $($Lead.Type)..."; f='Red'} }
-    else { @{msg="I found $($Lead.Data.length) $($Lead.Type)(s) !"; f='Green'} }
-
-    Write-Host @foundMsg
+    $res = [array](Receive-Job $job -Wait)
   }
 
-  END { return $Lead }
+  END { return $res }
 }
