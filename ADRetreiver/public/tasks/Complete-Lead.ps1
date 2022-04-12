@@ -48,12 +48,12 @@ function Complete-Lead {
           default { Get-AccountDetails -Account $object -Type $type }
         }
       }
-      catch { Write-Error "Something went wrong for $type n°$index : $name`n$_" }
+      catch { Write-Error "Something went wrong for $type n°$index $name : `n$_" }
 
       $index++
     }
 
-    Write-Progress -Activity "I'm done gathering details !" -Status "100% completed..." -PercentComplete 100
+    Write-Progress -Activity "I'm done gathering $type details !" -Status "100% completed..." -PercentComplete 100
   }
 
   END { return $res }

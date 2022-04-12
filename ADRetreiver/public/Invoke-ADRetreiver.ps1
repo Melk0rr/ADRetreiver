@@ -33,7 +33,15 @@
       ValueFromPipelineByPropertyName = $false
     )]
     [ValidateNotNullOrEmpty()]
-    [object[]]  $Leads = @{ Type="user" }
+    [object[]]  $Leads = @{ Type="user" },
+
+    [Parameter(
+      Mandatory = $false,
+      ValueFromPipeline = $false,
+      ValueFromPipelineByPropertyName = $false
+    )]
+    [ValidateNotNullOrEmpty()]
+    [int]  $Timeout = 300
   )
 
   BEGIN {
@@ -55,7 +63,7 @@
       Write-Host "I'm on lead n°$index !" -f DarkYellow
 
       # Retreive data
-      $adReqTime = Measure-Command { $lead.Data = Initialize-Lead -Lead $lead -Domain $domainRoot }
+      $adReqTime = Measure-Command { $lead.Data = Initialize-Lead -Lead $lead -Timeout $Timeout }
 
       # Change message depending on result
       if ($lead.Data.length -eq 0) {

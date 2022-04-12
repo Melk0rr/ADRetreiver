@@ -24,14 +24,6 @@ function Initialize-Lead {
     [object]  $Lead,
 
     [Parameter(
-      Mandatory = $true,
-      ValueFromPipeline = $false,
-      ValueFromPipelineByPropertyName = $false
-    )]
-    [ValidateNotNullOrEmpty()]
-    [string]  $Domain,
-
-    [Parameter(
       Mandatory = $false,
       ValueFromPipeline = $false,
       ValueFromPipelineByPropertyName = $false
@@ -53,6 +45,9 @@ function Initialize-Lead {
     # Checking if a correct Type value has been provided
     if (!$Lead.Type) { throw "I don't know what I'm looking for..." }
 
+    # Retreiving domain name
+    $domain = (Get-ADDomain).DNSRoot
+
     if ("object", "user", "computer", "group", "gpo", "ou" -notcontains $Lead.Type) {
       throw "I don't recognize $($Lead.Type) lead... I can only investigate the following types: object, user, group, computer, ou."
     }
@@ -67,7 +62,7 @@ function Initialize-Lead {
 
   PROCESS {
 
-    Write-Host "I'm looking for $($Lead.Type)(s) $(if ($Lead.SearchBase) { "from $($Lead.SearchBase) " })in $Domain" -f DarkYellow -NoNewline
+    Write-Host "I'm looking for $($Lead.Type)(s) $(if ($Lead.SearchBase) { "from $($Lead.SearchBase) " })in $domain" -f DarkYellow -NoNewline
 
     # Retreiving data from AD can take a while : we create a thread and show a waiting indicator in the meantime
     $job = Start-ThreadJob -ScriptBlock {
