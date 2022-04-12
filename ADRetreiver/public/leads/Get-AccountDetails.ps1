@@ -59,6 +59,7 @@ function Get-AccountDetails {
       Name                 = $Account.Name
       SAN                  = $Account.SamAccountName
       SID                  = $Account.SID
+      DomainName           = (Split-DN $Account.DistinguishedName).Domain
       Status               = if ($Account.Enabled) { "Enabled" } else { "Disabled" }
       CreationDate         = $Account.Created
       LastChangeDate       = $Account.Modified

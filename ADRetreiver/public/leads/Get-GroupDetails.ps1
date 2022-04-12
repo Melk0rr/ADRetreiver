@@ -29,7 +29,9 @@ function Get-GroupDetails {
   PROCESS {
     $members = Get-ADGroupMember $Group -Recursive
 
-    $props = $Group | select-object *,` @{n='Members'; e={  }}
+    $props = $Group | select-object *,`
+      @{n='Members'; e={  }},`
+      @{n='DomainName'; e={ (Split-DN $Group.DistinguishedName).Domain }}
   }
 
   END { return $props | select-object $adProps.final }
