@@ -12,7 +12,7 @@
   {
     "type": "group",
     "initial": ["CN","Created","Modified","Description","MemberOf"],
-    "final": ["CN","DomainName","CreationDate","LastChangeDate","MemberOf","Description"]
+    "final": ["DistinguishedName","Name","SID","DomainName","Category","Scope","Members","CreationDate","LastChangeDate","MemberOf","Description"]
   },
   {
     "type": "gpo",
