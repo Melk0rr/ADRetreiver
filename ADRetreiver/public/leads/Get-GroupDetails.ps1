@@ -21,17 +21,41 @@ function Get-GroupDetails {
       ValueFromPipelineByPropertyName = $false
     )]
     [ValidateNotNullOrEmpty()]
-    [object]  $Group
+    [object]  $Group,
+
+    [Parameter(
+      Mandatory = $false,
+      ValueFromPipeline = $false,
+      ValueFromPipelineByPropertyName = $false
+    )]
+    [ValidateNotNullOrEmpty()]
+    [switch]  $RecursiveMembers
   )
 
-  BEGIN { $adProps = $ADRetreiverData.ADOProperties | where-object {($_.Type -eq "group")} }
+  BEGIN {
+    $adProps = $ADRetreiverData.ADOProperties | where-object {($_.Type -eq "group")}
+
+    # Handle parameters
+    $memberParams = @{ Identity = $Group }
+    if ($RecursiveMembers.IsPresent) { $memberParams.Add('Recursive', $RecursiveMembers) }
+  }
 
   PROCESS {
-    $members = Get-ADGroupMember $Group -Recursive
+    $members = Get-ADGroupMember @memberParams
 
-    $props = $Group | select-object *,`
-      @{n='Members'; e={  }},`
-      @{n='DomainName'; e={ (Split-DN $Group.DistinguishedName).Domain }}
+    $props = [pscustomobject]@{
+      DistinguishedName = $Group.DistinguishedName
+      Name              = $Group.Name
+      SID               = $Group.SID
+      DomainName        = (Split-DN $Group.DistinguishedName).Domain
+      Category          = $Group.GroupCategory
+      Scope             = $Group.GroupScope
+      Members           = $members
+      CreationDate      = $Group.Created
+      LastChangeDate    = $Group.Modified
+      MemberOf          = $Group.MemberOf
+      Description       = $Group.Description
+    }
   }
 
   END { return $props | select-object $adProps.final }

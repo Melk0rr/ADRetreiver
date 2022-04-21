@@ -43,6 +43,8 @@ To install this module, you first need to download the project. You can then cop
 
 `Import-Module ADRetreiver`
 
+Symlink works perfectly too.
+
 Alternatively, you can just import it directly from the project directory with:
 
 `Import-Module C:\Path\To\ADRetreiver`

@@ -89,7 +89,7 @@ function Get-AccountDetails {
     # User specific properties
     if ($Type -eq "user") {
       # Checks if the current account is a privileged account
-      $isAdmin = $ADRetreiverData.ADmins.DistinguishedName -contains $Account.DistinguishedName
+      $isAdmin = $ADRetreiverData.ADAdmins.DistinguishedName -contains $Account.DistinguishedName
 
       # Check if current account object is a nominative account
       $isPerson = ($Account.Surname -match $nameReg) -and ($Account.GivenName -match $nameReg) -and !$props.IsServiceAccount

@@ -45,7 +45,7 @@
   )
 
   BEGIN {
-    Write-Host $banner -ForegroundColor DarkYellow
+    Write-Host $banner -f DarkYellow
 
     # Retreiving domain name
     try { $domain = Get-ADDomain; $domainRoot = $domain.DNSRoot }
@@ -60,28 +60,33 @@
     Write-Host "I have to explore $($Leads.length) lead(s)..." -f DarkYellow
 
     foreach ($lead in $Leads) {
-      Write-Host "I'm on lead n°$index !" -f DarkYellow
+      Write-Host "- I'm on lead n°$index !" -f DarkYellow
 
       # Retreive data
-      $adReqTime = Measure-Command { $lead.Data = Initialize-Lead -Lead $lead -Timeout $Timeout }
+      $adReqTime = 0
+      if (!$lead.Data) {
+        $adReqTime = Measure-Command {
+          $lead = $lead | select-object *,` @{n='Data'; e={ Initialize-Lead -Lead $lead -Timeout $Timeout }}
+        }
+      } else { Write-Host "Oh, you already have infos for this lead !" -f DarkYellow }
+      
 
       # Change message depending on result
-      if ($lead.Data.length -eq 0) {
-        Write-Host "Sorry, I could not find any $($lead.Type)..." -f Red
-      }
+      if (($lead.Data -as [array]).length -eq 0) { Write-Host "-- Sorry, I could not find any $($lead.Type)..." -f Red }
       else {
-        Write-Host "I found $($lead.Data.length) $($lead.Type)(s) !" -f Green
-        Write-Host "Inspection took $(Get-Seconds $adReqTime)s !" -f DarkYellow
+        Write-Host "I found $(($lead.Data -as [array]).length) $($lead.Type)(s) !" -f Green
+        Write-Host "-- Inspection took $(Get-Seconds $adReqTime)s !" -f DarkYellow
 
-        Write-Host "I have to gather my discoveries for lead n°$index !" -f DarkYellow
+        Write-Host "-- I have to gather my discoveries for lead n°$index !" -f DarkYellow
 
         # Gather data
-        $time = Measure-Command { $lead.Result = Complete-Lead -Lead $lead }
-        Write-Host "Gathering took $(Get-Seconds $time)s !" -f DarkYellow
+        $time = Measure-Command { $lead = $lead | select-object *,` @{n='Result'; e={ Complete-Lead -Lead $lead }} }
+        Write-Host "-- Gathering took $(Get-Seconds $time)s !" -f DarkYellow
 
-        $res += $lead
+        $res += $lead | select-object * -ExcludeProperty 'Data'
       }
 
+      Write-Host ""
       $index++
     }
 
@@ -92,7 +97,7 @@
     Write-Host @"
     ============================================================
                           Gooooood BOY !
-"@ -ForegroundColor DarkYellow
+"@ -f DarkYellow
 
     return $res
   }

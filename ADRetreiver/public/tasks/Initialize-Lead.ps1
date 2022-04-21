@@ -55,14 +55,14 @@ function Initialize-Lead {
     # Set initial parameters. If searchbase is set : add it to parameters
     $params = @{
       Properties = ($ADRetreiverData.ADOProperties | where-object { $_.type -eq $Lead.Type }).initial
-      Filter = if ($Lead.Filter) { $Lead.Filter } else { "*" }
+      Filter = $Lead.Filter ?? "*"
     }
-    if ($Lead.SearchBase) { $params.Add('SearchBase', $Lead.SearchBase) }
+    if ($Lead.SearchBase) { $params.SearchBase = $Lead.SearchBase }
   }
 
   PROCESS {
 
-    Write-Host "I'm looking for $($Lead.Type)(s) $(if ($Lead.SearchBase) { "from $($Lead.SearchBase) " })in $domain" -f DarkYellow -NoNewline
+    Write-Host "-- I'm looking for $($Lead.Type)(s) $(if ($Lead.SearchBase) { "from $($Lead.SearchBase) " })in $domain" -f DarkYellow -NoNewline
 
     # Retreiving data from AD can take a while : we create a thread and show a waiting indicator in the meantime
     $job = Start-ThreadJob -ScriptBlock {
@@ -81,19 +81,19 @@ function Initialize-Lead {
               $prop, $val = $l.Filter -split ' -eq '
               if (!$val) { throw "GPO name must be precise: use '-eq' operator !" }; if ($prop -ne "Name") { throw "I can only search GPOs by Name !" }
 
-              Get-GPO $val
+              Get-GPO ($val.Trim('"', "'"))
             } else { Get-GPO -All }
           }
           default { Get-ADObject @p }
         }
       }
-      catch { Write-Host "Something went wrong. I could not retreive the informations I was supposed to: `n$_" -f Red}
+      catch { Write-Host "-- Something went wrong. I could not retreive the informations I was supposed to: `n$_" -f Red}
 
     } -ArgumentList $Lead, $params -Name ADReq
 
     # Waiting indicator
     while ("Completed", "Failed" -notcontains $job.State) {
-      Write-Host '.' -NoNewline -ForegroundColor DarkYellow
+      Write-Host '.' -NoNewline -f DarkYellow
 
       # If timeout is reached, cancel
       $Timeout -= $WaitStep
@@ -102,7 +102,7 @@ function Initialize-Lead {
       Start-Sleep -Seconds $waitStep
     }
 
-    $res = [array](Receive-Job $job -Wait)
+    [array]$res = Receive-Job $job -Wait
   }
 
   END { return $res }
