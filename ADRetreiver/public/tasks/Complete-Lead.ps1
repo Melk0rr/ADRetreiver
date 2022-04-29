@@ -37,7 +37,7 @@ function Complete-Lead {
 
       # Progress
       $percent = [math]::Round($index / ($Lead.Data -as [array]).length * 100, 2)
-      Write-Progress -Activity "-- Sniffing $type(s) details..." -CurrentOperation "Currently sniffing $name" -Status "$percent% completed..." -PercentComplete $percent
+      Write-Progress -Activity "-- Sniffing $type(s) details..." -Status "$percent% completed..." -CurrentOperation "Currently sniffing $name" -PercentComplete $percent
 
       # Calling appropriate properties formatting function depending on the object type
       try {
