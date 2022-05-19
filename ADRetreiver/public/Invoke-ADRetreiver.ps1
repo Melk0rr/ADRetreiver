@@ -41,11 +41,19 @@
       ValueFromPipelineByPropertyName = $false
     )]
     [ValidateNotNullOrEmpty()]
+    [switch]  $HideBanner,
+
+    [Parameter(
+      Mandatory = $false,
+      ValueFromPipeline = $false,
+      ValueFromPipelineByPropertyName = $false
+    )]
+    [ValidateNotNullOrEmpty()]
     [int]  $Timeout = 300
   )
 
   BEGIN {
-    Write-Host $banner -f DarkYellow
+    if (!$HideBanner.IsPresent) { Write-Host $banner -f DarkYellow }
 
     # Retreiving domain name
     try { $domain = Get-ADDomain; $domainRoot = $domain.DNSRoot }
@@ -68,7 +76,7 @@
         $adReqTime = Measure-Command {
           $lead = $lead | select-object *,` @{n='Data'; e={ Initialize-Lead -Lead $lead -Timeout $Timeout }}
         }
-      } else { Write-Host "Oh, you already have infos for this lead !" -f DarkYellow }
+      } else { Write-Host "-- Oh, you already have infos for this lead !" -f DarkYellow }
       
 
       # Change message depending on result

@@ -65,11 +65,11 @@ function Get-AccountDetails {
       LastChangeDate       = $Account.Modified
       IsServiceAccount     = $Account.DistinguishedName -like "*OU=Services*"
       LastLogonDate        = $lastLogon
-      LastLogonDelta       = if ($lastLogon) { Get-Days $lastLogon } else { -1 }
+      LastLogonDelta       = if ($lastLogon) { Get-Days (Get-Date $lastLogon) } else { -1 }
       PasswordNotRequired  = $Account.PasswordNotRequired
       PasswordNeverExpires = $Account.PasswordNeverExpires
       PasswordLastSet      = $pwdLastSet
-      PasswordLastSetDelta = if ($pwdLastSet) { Get-Days $pwdLastSet } else { -1 }
+      PasswordLastSetDelta = if ($pwdLastSet) { Get-Days (Get-Date $pwdLastSet) } else { -1 }
       Description          = $Account.Description
     }
 
@@ -98,7 +98,7 @@ function Get-AccountDetails {
       $props = $props | select-object *,`
         @{n='Surname'    ;e={ $Account.Surname }},`
         @{n='GivenName'  ;e={ $Account.GivenName }},`
-        @{n='Email'      ;e={ if ($Account.EmailAddress) { $Account.EmailAddress.ToLower() } else { $null } }},`
+        @{n='Email'      ;e={ if ($Account.UserPrincipalName) { $Account.UserPrincipalName.ToLower() } else { $null } }},`
         @{n='AccountType';e={ if ($isPerson) { "Person" } else {if ($props.IsServiceAccount) { "Service" } else { "Other" }} }},`
         @{n='Permissions';e={ if ($isAdmin) { "Admin" } else { "Default" } }},`
         @{n='Title'      ;e={ $Account.Title} }

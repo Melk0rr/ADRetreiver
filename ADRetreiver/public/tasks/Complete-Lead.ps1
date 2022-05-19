@@ -32,7 +32,8 @@ function Complete-Lead {
   }
 
   PROCESS {
-    $res += foreach ($object in $Lead.Data) {
+    foreach ($object in $Lead.Data) {
+      $props = $null
       $name = if ($type -eq "gpo") { $object.DisplayName } else { $object.Name }
 
       # Progress
@@ -51,7 +52,7 @@ function Complete-Lead {
       catch { Write-Error "Something went wrong for $type n°$index $name : `n$_" }
 
       $index++
-      $props
+      $res += $props
     }
 
     Write-Progress -Activity "Sniffing $type(s) details..." -Status "100% completed..." -Completed
