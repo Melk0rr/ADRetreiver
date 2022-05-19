@@ -52,7 +52,7 @@ Alternatively, you can just import it directly from the project directory with:
 ## Usage
 
 1. Simple usages:
-  - To retreive user informations: `$users = Invoke-ADRetreiver -Leads @{Type='user'}`
+  - To retreive user informations: `$users = Invoke-ADRetreiver -Leads @{Type='user'}` or `$users = Invoke-ADRetreiver`
   - To retreiver computer informations: `$computers = Invoke-ADRetreiver -Leads @{Type='computer'}`
   - To retreive GPO informations: `$gpos = Invoke-ADRetreiver -Leads @{Type='gpo'}`
   - To retreive OU informations: `$ous = Invoke-ADRetreiver -Leads @{Type='ou'}`
@@ -62,4 +62,4 @@ Alternatively, you can just import it directly from the project directory with:
   - Get a precise GPO: `$myGPO = Invoke-ADRetreiver -Leads @{Type='gpo'; Filter={Name -eq 'MyGPO'}}`
 3. You can provide multiple leads to the retreiver:
   - Retreive users and computers: `$users, $computers = Invoke-ADRetreiver -Leads @{Type='user'}, @{Type='computer'}`
-  - Provide leads from pipeline: `$leads | Invoke-ADRetreiver` | `(Get-Content ./leads.json | ConvertFrom-Json) | Invoke-ADRetreiver`
+  - Provide leads from pipeline: `$leads | Invoke-ADRetreiver` or `(Get-Content ./leads.json | ConvertFrom-Json) | Invoke-ADRetreiver`
