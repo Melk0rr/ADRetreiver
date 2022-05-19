@@ -1,7 +1,7 @@
 [
   {
     "type": "user",
-    "initial": ["Created","Description","Title","EmailAddress","LastLogonDate","Modified","PasswordLastSet","PasswordNotRequired","PasswordNeverExpires"],
+    "initial": ["Created","Description","Title","LastLogonDate","Modified","PasswordLastSet","PasswordNotRequired","PasswordNeverExpires"],
     "final": ["DistinguishedName","SAN","SID","Name","Surname","GivenName","Email","DomainName","Status","AccountType","Permissions","CreationDate","LastChangeDate","PasswordNotRequired","PasswordNeverExpires","PasswordLastSet","PasswordLastSetDelta","PasswordShouldBeReset","LastLogonDate","LastLogonDelta","ActivityPeriod","Active (30d)","Active (90d)","Active (180d)","Active (360d)","Health","HealthFlags","Title","Description"]
   },
   {
