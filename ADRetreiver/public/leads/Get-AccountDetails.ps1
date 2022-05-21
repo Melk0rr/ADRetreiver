@@ -52,39 +52,31 @@ function Get-AccountDetails {
 
   PROCESS {
     # Defining basic shared properties
-    $lastLogon, $pwdLastSet = $Account.LastLogonDate, $Account.PasswordLastSet
+    $props = $Account | select-object DistinguishedName, Name, SID, LastLogonDate, PasswordLastSet, PasswordNotRequired, PasswordNeverExpires, Description
 
-    $props = [PSCustomObject]@{
-      DistinguishedName    = $Account.DistinguishedName
-      Name                 = $Account.Name
-      SAN                  = $Account.SamAccountName
-      SID                  = $Account.SID
-      DomainName           = (Split-DN $Account.DistinguishedName).Domain
-      Status               = if ($Account.Enabled) { "Enabled" } else { "Disabled" }
-      CreationDate         = $Account.Created
-      LastChangeDate       = $Account.Modified
-      IsServiceAccount     = $Account.DistinguishedName -like "*OU=Services*"
-      LastLogonDate        = $lastLogon
-      LastLogonDelta       = if ($lastLogon) { Get-Days (Get-Date $lastLogon) } else { -1 }
-      PasswordNotRequired  = $Account.PasswordNotRequired
-      PasswordNeverExpires = $Account.PasswordNeverExpires
-      PasswordLastSet      = $pwdLastSet
-      PasswordLastSetDelta = if ($pwdLastSet) { Get-Days (Get-Date $pwdLastSet) } else { -1 }
-      Description          = $Account.Description
-    }
+    $props = $props | select-object *,`
+      @{n='SAN';                  e = {$Account.SamAccountName}},`
+      @{n='DomainName';           e={ (Split-DN $Account.DistinguishedName).Domain }},`
+      @{n='Status';               e={ $Account.Enabled ? "Enabled" : "Disabled" }},`
+      @{n='CreationDate';         e={ $Account.Created }},`
+      @{n='LastChangeDate';       e={ $Account.Modified }},`
+      @{n='IsServiceAccount';     e={ $Account.DistinguishedName -like "*OU=Services*" }},`
+      @{n='LastLogonDelta';       e={ $Account.LastLogonDate ? (Get-Days (Get-Date $Account.LastLogonDate)) : -1 }},`
+      @{n='PasswordLastSetDelta'; e={ $Account.PasswordLastSet ? (Get-Days (Get-Date $Account.PasswordLastSet)) : -1 }}
 
     # Retreive password and activity rules described in the appropriate CSV file
     $pwdRule = $ADRetreiverData.ADPwdRules | where-object {($props.PasswordLastSetDelta -ge $_.periodStart) -and ($props.PasswordLastSetDelta -lt $_.periodEnd)}
     $activityRule = $ADRetreiverData.ADActivityRules | where-object {($props.LastLogonDelta -ge $_.periodStart) -and ($props.LastLogonDelta -lt $_.periodEnd)}
 
     # Adding more shared properties: Activity (30d, 90d, 180d, 360d), password status, activity period
+    $hasAlreadyLogged = ($props.LastLogonDelta -gt -1)
     $props = $props | select-object *,`
-      @{n='PasswordShouldBeReset'                   ;e={ $pwdRule.ShouldCHange }},`
-      @{n='ActivityPeriod'                          ;e={ [int]$activityRule.periodEnd }},`
-      @{n="Active ($($normalActivity.periodEnd)d)"  ;e={ ($_.LastLogonDelta -gt -1) -and ($_.LastLogonDelta -le $normalActivity.periodEnd) }},`
-      @{n="Active ($($elevatedActivity.periodEnd)d)";e={ ($_.LastLogonDelta -gt -1) -and ($_.LastLogonDelta -le $elevatedActivity.periodEnd) }},`
-      @{n="Active ($($highActivity.periodEnd)d)"    ;e={ ($_.LastLogonDelta -gt -1) -and ($_.LastLogonDelta -le $highActivity.periodEnd) }},`
-      @{n="Active ($($severeActivity.periodEnd)d)"  ;e={ ($_.LastLogonDelta -gt -1) -and ($_.LastLogonDelta -le $severeActivity.periodEnd) }}
+      @{n='PasswordShouldBeReset'; e={ [bool]$pwdRule.ShouldCHange }},`
+      @{n='ActivityPeriod'       ; e={ [int]$activityRule.periodEnd }}
+
+    foreach ($activity in @($normalActivity, $elevatedActivity, $highActivity, $severeActivity)) {
+      $props = $props | select-object *,` @{n="Active ($($activity.periodEnd)d)"; e={ $hasAlreadyLogged -and ($_.LastLogonDelta -le $activity.periodEnd) }}
+    }
 
     # User specific properties
     if ($Type -eq "user") {
@@ -98,9 +90,9 @@ function Get-AccountDetails {
       $props = $props | select-object *,`
         @{n='Surname'    ;e={ $Account.Surname }},`
         @{n='GivenName'  ;e={ $Account.GivenName }},`
-        @{n='Email'      ;e={ if ($Account.UserPrincipalName) { $Account.UserPrincipalName.ToLower() } else { $null } }},`
-        @{n='AccountType';e={ if ($isPerson) { "Person" } else {if ($props.IsServiceAccount) { "Service" } else { "Other" }} }},`
-        @{n='Permissions';e={ if ($isAdmin) { "Admin" } else { "Default" } }},`
+        @{n='Email'      ;e={ $Account.UserPrincipalName ? ($Account.UserPrincipalName.ToLower()) : $null }},`
+        @{n='AccountType';e={ $isPerson ? "Person" : $props.IsServiceAccount ? "Service" : "Other" }},`
+        @{n='Permissions';e={ $isAdmin ? "Admin" : "Default" }},`
         @{n='Title'      ;e={ $Account.Title} }
 
     # Computer specific properties
@@ -110,29 +102,27 @@ function Get-AccountDetails {
       if ($os -and ($os -notmatch "^[a-zA-Z0-9_]+$")) {
         if ($os -like "*Windows*") {
           $osFamily = "Windows"
-          $computerType = if (!$os) { "Server" } else { if ($os -like "*server*") { "Server" } else { "Workstation" } }
+          $computerType = !$os ? "Server" : ($os -like "*server*") ? "Server" : "Workstation"
 
-          # Retreiving OS build and version
-          $osVersionInfos = $Account.OperatingSystemVersion -split ' '
-          $osBuildNumber = [int]$OSVersionInfos[1].Trim('(', ')')
+          # Retreiving OS build
+          [int]$osBuildNumber = (($Account.OperatingSystemVersion -split ' ')[1].Trim('(', ')'))
 
           # Retreiving build infos from CSV
           $buildInfos = $ADRetreiverData.WindowsBuilds | where-object {($_.build -eq $osBuildNumber) -and ($_.type -eq $computerType)}
           if (!$buildInfos) { throw "Build infos not found !" }
 
-          $osShort = if ($computerType -eq "Server") { "Windows Server $($buildInfos.os)" } else { "Windows $($buildInfos.os)" }
+          $osShort = ($computerType -eq "Server") ? "Windows Server $($buildInfos.os)" : "Windows $($buildInfos.os)"
 
           # Retreive windows editions
           $osEdition = $ADRetreiverData.WindowsEditions | where-object {($os -like $_.pattern)}
-          $osEdition = if ($osEdition) { $osEdition.name } else { "Standard" }
+          $osEdition = $osEdition ? $osEdition.name : "Standard"
 
           # Multiple checks relative to end of support
           $extendedSupport = $os -match "LTSB|LTSC"
-          $support = if ((Get-Days (Get-Date $buildInfos.eos)) -le 0) { "Ongoing" }
-            else { if ($extendedSupport -and (Get-Days (Get-Date $buildInfos.ltsEos)) -le 0) { "Extended" } else { "Retired" } }
+          $support = ((Get-Days (Get-Date $buildInfos.eos)) -le 0) ? "Ongoing" : ($extendedSupport -and (Get-Days (Get-Date $buildInfos.ltsEos)) -le 0) ? "Extended" : "Retired"
 
           $isSupported = ($support -eq "Ongoing") -or ($support -eq "Extended")
-          $endOfSupportDate = if ($extendedSupport) { Get-Date $buildInfos.ltsEos } else { Get-Date $buildInfos.eos }
+          $endOfSupportDate = $extendedSupport ? (Get-Date $buildInfos.ltsEos) : (Get-Date $buildInfos.eos)
 
         } elseif ($os -like "*Linux*") {
           $osFamily = "Linux"
@@ -141,8 +131,8 @@ function Get-AccountDetails {
         }
 
         # Remove health if os is no longer supported
-        $health -= if (!$isSupported) { (50 + [math]::truncate((Get-Days $endOfSupportDate) / 360) * 20) } else { 0 }
-        $healthFlags += if (!$isSupported) { "NotSupported" } else { "Supported" }
+        $health -= !$isSupported ? (50 + [math]::truncate((Get-Days (Get-Date $endOfSupportDate)) / 360) * 20) : 0
+        $healthFlags += !$isSupported ? "NotSupported" : "Supported"
       } else { $computerType = "Server"; $health = 0; $healthFlags += "NoOSDataFound" }
 
       # Add computer properties
@@ -164,12 +154,12 @@ function Get-AccountDetails {
     if ($props.PasswordNotRequired) { $health = 0; $healthFlags += "PwdNotRequired" }
 
     # Remove health if the user has not logged in a while
-    $health -= if ($isAdmin) { [math]::min(100, [int]$activityRule.healthLoss * 2) } else { [int]$activityRule.healthLoss }
-    $healthFlags += if ($isAdmin) { "Admin$($activityRule.flag)" } else { $activityRule.flag }
+    $health -= $isAdmin ? [math]::min(100, [int]$activityRule.healthLoss * 2) : [int]$activityRule.healthLoss
+    $healthFlags += $isAdmin ? "Admin$($activityRule.flag)" : $activityRule.flag
 
     # Remove health if password is expired
-    $health -= if ($isAdmin) { [math]::min(100, [int]$pwdRule.healthLoss * 2) } else { [int]$pwdRule.healthLoss }
-    $healthFlags += if ($isAdmin) { "Admin$($pwdRule.flag)" } else { $pwdRule.flag }
+    $health -= $isAdmin ? [math]::min(100, [int]$pwdRule.healthLoss * 2) : [int]$pwdRule.healthLoss
+    $healthFlags += $isAdmin ? "Admin$($pwdRule.flag)" : $pwdRule.flag
 
     # Add health properties
     $props = $props | select-object *,` @{n='Health';e={ [math]::max(0, $health) }},` @{n='HealthFlags';e={ $healthFlags -join ';' }}

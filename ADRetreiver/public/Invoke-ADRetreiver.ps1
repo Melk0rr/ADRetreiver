@@ -56,8 +56,8 @@
     if (!$HideBanner.IsPresent) { Write-Host $banner -f DarkYellow }
 
     # Retreiving domain name
-    try { $domain = Get-ADDomain; $domainRoot = $domain.DNSRoot }
-    catch { Write-Error "Sorry but I can't find any domain..." }
+    $domain = Get-ADDomain; $domainRoot = $domain.DNSRoot
+    if (!$domain) { throw "Sorry but I can't find any domain..." }
 
     Write-Host "If my scent is right, we are on $domainRoot domain !" -f DarkYellow
 

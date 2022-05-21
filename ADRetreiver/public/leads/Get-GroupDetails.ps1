@@ -36,7 +36,7 @@ function Get-GroupDetails {
     $adProps = $ADRetreiverData.ADOProperties | where-object {($_.Type -eq "group")}
 
     # Handle parameters
-    $memberParams = @{ Identity = $Group }
+    $memberParams = @{ Identity = $Group.DistinguishedName }
     if ($RecursiveMembers.IsPresent) { $memberParams.Add('Recursive', $RecursiveMembers) }
   }
 
