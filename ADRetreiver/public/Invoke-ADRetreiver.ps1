@@ -41,6 +41,14 @@
       ValueFromPipelineByPropertyName = $false
     )]
     [ValidateNotNullOrEmpty()]
+    [switch]  $MinBanner,
+
+    [Parameter(
+      Mandatory = $false,
+      ValueFromPipeline = $false,
+      ValueFromPipelineByPropertyName = $false
+    )]
+    [ValidateNotNullOrEmpty()]
     [switch]  $HideBanner,
 
     [Parameter(
@@ -53,7 +61,8 @@
   )
 
   BEGIN {
-    if (!$HideBanner.IsPresent) { Write-Host $banner -f DarkYellow }
+    $scriptBanner = $MinBanner.IsPresent ? $bannerMin : $banner
+    if (!$HideBanner.IsPresent) { Write-Host $scriptBanner -f DarkYellow }
 
     # Retreiving domain name
     $domain = Get-ADDomain; $domainRoot = $domain.DNSRoot
