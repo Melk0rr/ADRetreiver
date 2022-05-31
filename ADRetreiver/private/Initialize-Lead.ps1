@@ -87,7 +87,7 @@ function Initialize-Lead {
           default { Get-ADObject @p }
         }
       }
-      catch { Write-Host "-- Something went wrong. I could not retreive the informations I was supposed to: `n$_" -f Red}
+      catch { Write-Host "`n-- Something went wrong. I could not retreive the informations I was supposed to: `n$_" -f Red}
 
     } -ArgumentList $Lead, $params -Name ADReq
 
@@ -97,7 +97,7 @@ function Initialize-Lead {
 
       # If timeout is reached, cancel
       $Timeout -= $WaitStep
-      if ($Timeout -le 0) { throw "Uhh it's taking me too much time... Better continue." }
+      if ($Timeout -le 0) { Write-Host "Uhh it's taking me too much time... Better continue." -f Red }
 
       Start-Sleep -Seconds $waitStep
     }
