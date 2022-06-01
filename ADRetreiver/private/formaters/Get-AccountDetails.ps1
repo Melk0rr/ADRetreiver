@@ -41,7 +41,7 @@ function Get-AccountDetails {
 
     # Activity rules
     $noActivity, $normalActivity, $elevatedActivity, $highActivity, $severeActivity, $criticalActivity = $ADRetreiverData.ADActivityRules
-    $adProps = $ADRetreiverData.ADOProperties | where-object {($_.type -eq $Type)}
+    $adProps = $ADRetreiverData.ADOProperties.Where({ $_.type -eq $Type })
   }
 
   PROCESS {
@@ -60,8 +60,8 @@ function Get-AccountDetails {
     [pscustomobject]$props = Add-Properties ([pscustomobject]$Account) $baseProps
 
     # Retreive password and activity rules described in the appropriate CSV file
-    $pwdRule = $ADRetreiverData.ADPwdRules | where-object {($props.PasswordLastSetDelta -ge $_.periodStart) -and ($props.PasswordLastSetDelta -lt $_.periodEnd)}
-    $activityRule = $ADRetreiverData.ADActivityRules | where-object {($props.LastLogonDelta -ge $_.periodStart) -and ($props.LastLogonDelta -lt $_.periodEnd)}
+    $pwdRule = $ADRetreiverData.ADPwdRules.Where({ ($props.PasswordLastSetDelta -ge $_.periodStart) -and ($props.PasswordLastSetDelta -lt $_.periodEnd) })
+    $activityRule = $ADRetreiverData.ADActivityRules.Where({ ($props.LastLogonDelta -ge $_.periodStart) -and ($props.LastLogonDelta -lt $_.periodEnd) })
 
     # Adding more shared properties: Activity (30d, 90d, 180d, 360d), password status, activity period
     $hasAlreadyLogged = ($props.LastLogonDelta -gt -1)

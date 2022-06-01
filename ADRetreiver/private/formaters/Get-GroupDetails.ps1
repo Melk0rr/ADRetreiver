@@ -33,7 +33,7 @@ function Get-GroupDetails {
   )
 
   BEGIN {
-    $adProps = $ADRetreiverData.ADOProperties | where-object {($_.Type -eq "group")}
+    $adProps = $ADRetreiverData.ADOProperties.Where({ $_.Type -eq "group" })
 
     # Handle parameters
     $memberParams = @{ Identity = $Group.DistinguishedName }

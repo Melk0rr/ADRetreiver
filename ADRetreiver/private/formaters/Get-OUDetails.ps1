@@ -24,7 +24,7 @@ function Get-OUDetails {
     [object]  $OU
   )
 
-  BEGIN { $adProps = $ADRetreiverData.ADOProperties | where-object {($_.Type -eq "ou")} }
+  BEGIN { $adProps = $ADRetreiverData.ADOProperties.Where({ ($_.Type -eq "ou") }) }
 
   PROCESS {
     $props = $OU | select-object *,`

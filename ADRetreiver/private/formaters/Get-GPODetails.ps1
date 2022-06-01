@@ -25,12 +25,15 @@ function Get-GPODetails {
   )
 
   BEGIN {
-    $adProps = $ADRetreiverData.ADOProperties | where-object {($_.Type -eq "gpo")}
+    $adProps = $ADRetreiverData.ADOProperties.Where({ $_.Type -eq "gpo" })
   }
 
   PROCESS {
 
-    try { $impactedOUs = Get-ADOrganizationalUnit -Filter * -Properties gpLink | where-object {$_.gpLink -like "*$($GPO.id)*"} }
+    try {
+      $ouWithLink = Get-ADOrganizationalUnit -Filter * -Properties gpLink
+      $impactedOUs = $ouWithLink.Where({ $_.gpLink -like "*$($GPO.id)*" })
+    }
     catch { Write-Error "Error while trying to retreive OUs impacted by GPO $($GPO.DisplayName)" }
 
     $props = $GPO | select-object *,` @{n='ImpactedOUs'; e={ $impactedOUs }},` @{n='ID'; e={$_.Id}},` @{n='Name'; e={$_.DisplayName}} -ExcludeProperty Id, DisplayName
