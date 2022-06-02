@@ -78,10 +78,14 @@ function Initialize-Lead {
           "gpo" {
             # Get-GPO is semantically different from other Get-ADxx functions
             if ($l.Filter -ne "*") {
-              $prop, $val = $l.Filter -split ' -eq '
-              if (!$val) { throw "GPO name must be precise: use '-eq' operator !" }; if ($prop -ne "Name") { throw "I can only search GPOs by Name !" }
+              $checkGroupPolicy = Get-Command -Module GroupPolicy
 
-              Get-GPO ($val.Trim('"', "'"))
+              if ($checkGroupPolicy) {
+                $prop, $val = $l.Filter -split ' -eq '
+                if (!$val) { throw "GPO name must be precise: use '-eq' operator !" }; if ($prop -ne "Name") { throw "I can only search GPOs by Name !" }
+  
+                Get-GPO ($val.Trim('"', "'")) 
+              } else { throw "GroupPolicy Module was not found !" }
             } else { Get-GPO -All }
           }
           default { Get-ADObject @p }

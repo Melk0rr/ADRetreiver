@@ -31,7 +31,7 @@ function Get-UserDetails {
 
   PROCESS {
     # Checks if the current account is a privileged account
-    $isAdmin = $ADRetreiverData.ADAdmins.DistinguishedName -contains $Account.DistinguishedName
+    $isAdmin = $ADRetreiverData.ADAdmins.DistinguishedName.Contains($Account.DistinguishedName)
 
     # Check if current account object is a nominative account
     $isPerson = ($Account.Surname -match $nameReg) -and ($Account.GivenName -match $nameReg) -and !$Account.IsServiceAccount

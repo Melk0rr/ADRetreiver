@@ -39,11 +39,14 @@ function Get-Health {
 
   PROCESS {
     if ($Type -eq "computer") {
-      $isSupported = "Ongoing", "Extended" -contains $Account.support
+      if ($Account.computerType -ne 'Unknown') {
+        $isSupported = @("Ongoing", "Extended").Contains($Account.support)
 
-      # Remove health if os is no longer supported
-      $health -= !$isSupported ? (50 + [math]::truncate((Get-Days (Get-Date $Account.endOfSupportDate)) / 360) * 20) : 0
-      $healthFlags += !$isSupported ? "NotSupported" : "Supported"
+        # Remove health if os is no longer supported
+        $health -= !$isSupported ? (50 + [math]::truncate((Get-Days (Get-Date $Account.endOfSupportDate)) / 360) * 20) : 0
+        $healthFlags += !$isSupported ? "NotSupported" : "Supported"
+        
+      } else { $health = 0; $healthFlags += 'NoOSData' }
     }
 
     # If the password is not required immediately set health to 0
@@ -60,6 +63,6 @@ function Get-Health {
   }
 
   END { 
-    return ($Account | select-object *,` @{n='Health';e={ [math]::max(0, $health) }},` @{n='HealthFlags';e={ $healthFlags -join ';' }})
+    return ($Account | select-object *,` @{n="Health";e={ [math]::max(0, $health) }},` @{n="HealthFlags";e={ $healthFlags -join ';' }})
   }
 }

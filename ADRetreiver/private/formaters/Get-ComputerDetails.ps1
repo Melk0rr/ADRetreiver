@@ -59,7 +59,7 @@ function Get-ComputerDetails {
         # Define os family
       }
 
-    }
+    } else { $computerType = 'Unknown' }
 
     # Add computer properties
     $newProps = @(
