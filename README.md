@@ -29,7 +29,7 @@
     ============================================================
 ```
 
-This project is a Powershell tool that utilises the ActiveDirectory Module to retreive various informations from an Active Directory domain. It aims to centralize various built-in commands from the ActiveDirectory Module and to provide more detailed and useful informations at the same time.
+This project is a Powershell tool that uses the ActiveDirectory Module to retreive various informations from an Active Directory domain. It aims to centralize various built-in commands from the ActiveDirectory Module and to provide more detailed and useful informations at the same time.
 
 ## Requirements
 
