@@ -37,7 +37,7 @@ function Format-Lead {
   PROCESS {
     # Retreive data
     if (!$lead.Data) {
-      $lead | add-member -MemberType NoteProperty -Name 'Data' -Value (Format-Lead -Lead $lead -Timeout $Timeout)
+      $lead | add-member -MemberType NoteProperty -Name 'Data' -Value (Initialize-Lead -Lead $lead -Timeout $Timeout)
     }
     else { Write-Host "Oh, you already have infos for this lead !" }
     
