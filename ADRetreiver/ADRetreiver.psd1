@@ -9,28 +9,28 @@
 @{
 
   # Script module or binary module file associated with this manifest.
-  RootModule = 'ADRetreiver.psm1'
+  RootModule        = 'ADRetreiver.psm1'
 
   # Version number of this module.
-  ModuleVersion = '2.2.5'
+  ModuleVersion     = '2.3.1'
 
   # Supported PSEditions
   # CompatiblePSEditions = @()
 
   # ID used to uniquely identify this module
-  GUID = 'd9fa8489-2474-4b2c-9c48-467e0c03ce25'
+  GUID              = 'd9fa8489-2474-4b2c-9c48-467e0c03ce25'
 
   # Author of this module
-  Author = 'Jaufré Lallement'
+  Author            = 'Jaufré Lallement'
 
   # Company or vendor of this module
-  CompanyName = ''
+  CompanyName       = ''
 
   # Copyright statement for this module
-  Copyright = '(c) 2022 Jaufré'
+  Copyright         = '(c) 2022 Jaufré'
 
   # Description of the functionality provided by this module
-  Description = 'Powershell based AD data retreiver and information gatherer.'
+  Description       = 'Powershell based AD data retreiver and information gatherer.'
 
   # Minimum version of the Windows PowerShell engine required by this module
   PowerShellVersion = '7.0'
@@ -51,7 +51,7 @@
   # ProcessorArchitecture = ''
 
   # Modules that must be imported into the global environment prior to importing this module
-  RequiredModules = @('ActiveDirectory')
+  RequiredModules   = @('ActiveDirectory')
 
   # Assemblies that must be loaded prior to importing this module
   # RequiredAssemblies = @()
@@ -72,13 +72,13 @@
   FunctionsToExport = 'Invoke-ADRetreiver'
 
   # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
-  CmdletsToExport = @()
+  CmdletsToExport   = @()
 
   # Variables to export from this module
   # VariablesToExport = @()
 
   # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
-  AliasesToExport = @()
+  AliasesToExport   = @()
 
   # DSC resources to export from this module
   # DscResourcesToExport = @()
@@ -90,37 +90,37 @@
   # FileList = @()
 
   # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
-  PrivateData = @{
+  PrivateData       = @{
 
-      PSData = @{
+    PSData = @{
 
-          # Tags applied to this module. These help with module discovery in online galleries.
-          Tags = 'Utils','AD','InformationGathering'
+      # Tags applied to this module. These help with module discovery in online galleries.
+      Tags       = 'Utils', 'AD', 'InformationGathering'
 
-          # A URL to the license for this module.
-          # LicenseUri = ''
+      # A URL to the license for this module.
+      # LicenseUri = ''
 
-          # A URL to the main website for this project.
-          ProjectUri = 'https://github.com/JaufreLallement/ADRetreiver'
+      # A URL to the main website for this project.
+      ProjectUri = 'https://github.com/JaufreLallement/ADRetreiver'
 
-          # A URL to an icon representing this module.
-          # IconUri = ''
+      # A URL to an icon representing this module.
+      # IconUri = ''
 
-          # ReleaseNotes of this module
-          # ReleaseNotes = ''
+      # ReleaseNotes of this module
+      # ReleaseNotes = ''
 
-          # Prerelease string of this module
-          # Prerelease = ''
+      # Prerelease string of this module
+      # Prerelease = ''
 
-          # Flag to indicate whether the module requires explicit user acceptance for install/update
-          # RequireLicenseAcceptance = $false
+      # Flag to indicate whether the module requires explicit user acceptance for install/update
+      # RequireLicenseAcceptance = $false
 
-          # External dependent modules of this module
-          # ExternalModuleDependencies = @()
+      # External dependent modules of this module
+      # ExternalModuleDependencies = @()
 
-      } # End of PSData hashtable
+    } # End of PSData hashtable
 
-   } # End of PrivateData hashtable
+  } # End of PrivateData hashtable
 
   # HelpInfo URI of this module
   # HelpInfoURI = ''
@@ -128,4 +128,4 @@
   # Default prefix for commands exported from this module. Override the default prefix using Import-Module -Prefix.
   # DefaultCommandPrefix = ''
 
-  }
+}
