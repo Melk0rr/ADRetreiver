@@ -33,7 +33,7 @@
       ValueFromPipelineByPropertyName = $false
     )]
     [ValidateNotNullOrEmpty()]
-    [object[]]  $Leads = @{ Type="user" },
+    [object[]]  $Leads = @{ Type = "user" },
 
     [Parameter(
       Mandatory = $false,
@@ -68,53 +68,27 @@
     $domain = Get-ADDomain; $domainRoot = $domain.DNSRoot
     if (!$domain) { throw "Sorry but I can't find any domain..." }
 
-    Write-Host "If my scent is right, we are on $domainRoot domain !" -f DarkYellow
+    $startTime = Get-Date -Format "dddd-MM-yyyy HH:mm:ss"
+
+    Write-Host "If my scent is right, we are on $domainRoot domain !"
+    Write-Host "* Starting the work - $startTime *"
 
     $index, $res = 1, @()
   }
 
   PROCESS {
-    Write-Host "I have to explore $($Leads.length) lead(s)..." -f DarkYellow
+    Write-Host "Exploring $($Leads.length) lead(s)..."
 
     foreach ($lead in $Leads) {
-      Write-Host "- I'm on lead n°$index !" -f DarkYellow
-
-      # Retreive data
-      $adReqTime = 0
-      if (!$lead.Data) {
-        $adReqTime = Measure-Command {
-          $lead = $lead | select-object *,` @{n='Data'; e={ Initialize-Lead -Lead $lead -Timeout $Timeout }}
-        }
-      } else { Write-Host "-- Oh, you already have infos for this lead !" -f DarkYellow }
-      
-
-      # Change message depending on result
-      if (($lead.Data -as [array]).length -eq 0) { Write-Host "-- Sorry, I could not find any $($lead.Type)..." -f Red }
-      else {
-        Write-Host "I found $(($lead.Data -as [array]).length) $($lead.Type)(s) !" -f Green
-        Write-Host "-- Inspection took $(Get-Seconds $adReqTime)s !" -f DarkYellow
-
-        Write-Host "-- I have to gather my discoveries for lead n°$index !" -f DarkYellow
-
-        # Gather data
-        $time = Measure-Command { $lead = $lead | select-object *,` @{n='Result'; e={ Complete-Lead -Lead $lead }} }
-        Write-Host "-- Gathering took $(Get-Seconds $time)s !" -f DarkYellow
-
-        $res += $lead | select-object * -ExcludeProperty 'Data'
-      }
-
-      Write-Host ""
+      $res += Format-Lead -Lead $lead -LeadNumber $index
       $index++
-    }
-
-    Write-Host "I'm done exploring all leads !" -f Green
+    }    
   }
 
   END {
-    Write-Host @"
-    ============================================================
-                          Gooooood BOY !
-"@ -f DarkYellow
+    $endTime = Get-Date
+    Write-Host "I'm done exploring all leads !" -f Green
+    Write-Host "Investigation took me $(Get-TimeDiff $startTime $endTime)"
 
     return $res
   }

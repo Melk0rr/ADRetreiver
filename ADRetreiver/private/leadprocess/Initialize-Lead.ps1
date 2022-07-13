@@ -55,14 +55,14 @@ function Initialize-Lead {
     # Set initial parameters. If searchbase is set : add it to parameters
     $params = @{
       Properties = ($ADRetreiverData.ADOProperties | where-object { $_.type -eq $Lead.Type }).initial
-      Filter = $Lead.Filter ?? "*"
+      Filter     = $Lead.Filter ?? "*"
     }
     if ($Lead.SearchBase) { $params.SearchBase = $Lead.SearchBase }
   }
 
   PROCESS {
 
-    Write-Host "-- I'm looking for $($Lead.Type)(s) $(if ($Lead.SearchBase) { "from $($Lead.SearchBase) " })in $domain" -f DarkYellow -NoNewline
+    Write-Host "I'm looking for $($Lead.Type)(s) $(if ($Lead.SearchBase) { "from $($Lead.SearchBase) " })in $domain" -NoNewline
 
     # Retreiving data from AD can take a while : we create a thread and show a waiting indicator in the meantime
     $job = Start-ThreadJob -ScriptBlock {
@@ -71,10 +71,10 @@ function Initialize-Lead {
       try {
         # Type dependent AD requests
         switch ($l.Type) {
-          "user"     { Get-ADUser @p }
+          "user" { Get-ADUser @p }
           "computer" { Get-ADComputer @p }
-          "group"    { Get-ADGroup @p }
-          "ou"       { Get-ADOrganizationalUnit @p }
+          "group" { Get-ADGroup @p }
+          "ou" { Get-ADOrganizationalUnit @p }
           "gpo" {
             # Get-GPO is semantically different from other Get-ADxx functions
             if ($l.Filter -ne "*") {
@@ -85,19 +85,21 @@ function Initialize-Lead {
                 if (!$val) { throw "GPO name must be precise: use '-eq' operator !" }; if ($prop -ne "Name") { throw "I can only search GPOs by Name !" }
   
                 Get-GPO ($val.Trim('"', "'")) 
-              } else { throw "GroupPolicy Module was not found !" }
-            } else { Get-GPO -All }
+              }
+              else { throw "GroupPolicy Module was not found !" }
+            }
+            else { Get-GPO -All }
           }
           default { Get-ADObject @p }
         }
       }
-      catch { Write-Host "`n-- Something went wrong. I could not retreive the informations I was supposed to: `n$_" -f Red}
+      catch { Write-Host "`n-- Something went wrong. I could not retreive the informations I was supposed to: `n$_" -f Red }
 
     } -ArgumentList $Lead, $params -Name ADReq
 
     # Waiting indicator
     while ("Completed", "Failed" -notcontains $job.State) {
-      Write-Host '.' -NoNewline -f DarkYellow
+      Write-Host '.' -NoNewline
 
       # If timeout is reached, cancel
       $Timeout -= $WaitStep

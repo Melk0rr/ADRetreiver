@@ -26,7 +26,7 @@ function Complete-Lead {
 
   BEGIN {
     $type = $Lead.Type
-    Write-Host "-- I'm gathering details for $(($Lead.Data -as [array]).length) $type(s)..." -f DarkYellow
+    Write-Host "I'm gathering details for $(($Lead.Data -as [array]).length) $type(s)..."
 
     $res, $index = @(), 0
   }
@@ -44,8 +44,8 @@ function Complete-Lead {
       try {
         $props = switch ($type) {
           "group" { Get-GroupDetails -Group $object -RecursiveMembers:($Lead.RecursiveMembers ?? $false) }
-          "gpo"   { Get-GPODetails -GPO $object }
-          "ou"    { Get-OUDetails -OU $object }
+          "gpo" { Get-GPODetails -GPO $object }
+          "ou" { Get-OUDetails -OU $object }
           default { Get-AccountDetails -Account $object -Type $type }
         }
       }
