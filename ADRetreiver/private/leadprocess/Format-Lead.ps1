@@ -45,7 +45,7 @@ function Format-Lead {
     if ($lead.Data.length -eq 0) { Write-Host "Sorry, I could not find any $($lead.Type)..." -f Red }
     else {
       Write-Host "I found $($lead.Data.length) $($lead.Type)(s) !" -f Green
-      Write-Host "Gathering my discoveries..."
+      Write-Host "Gathering my discoveries"
 
       # Gather data
       $lead | add-member -MemberType NoteProperty -Name 'Result' -Value (Complete-Lead -Lead $lead) -Force

@@ -71,13 +71,13 @@
     $startTime = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
     Write-Host "If my scent is right, we are on $domainRoot domain !"
-    Write-Host "* Starting the work - $startTime *"
+    Write-Host "* Starting the work $startTime *"
 
     $index, $res = 1, @()
   }
 
   PROCESS {
-    Write-Host "Exploring $($Leads.length) lead(s)..."
+    Write-Host "Exploring $($Leads.length) lead(s)"
 
     foreach ($lead in $Leads) {
       $res += Format-Lead -Lead $lead -LeadNumber $index
