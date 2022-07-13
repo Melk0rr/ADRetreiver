@@ -49,11 +49,10 @@ function Format-Lead {
 
       # Gather data
       $lead | add-member -MemberType NoteProperty -Name 'Result' -Value (Complete-Lead -Lead $lead) -Force
-      $res += $lead | select-object * -ExcludeProperty 'Data'
     }
 
     $index++
   }
 
-  END { return $lead }
+  END { return ($lead | select-object * -ExcludeProperty 'Data') }
 }
