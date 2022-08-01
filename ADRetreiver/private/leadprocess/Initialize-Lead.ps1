@@ -54,7 +54,7 @@ function Initialize-Lead {
 
     # Set initial parameters. If searchbase is set : add it to parameters
     $params = @{
-      Properties = ($ADRetreiverData.ADOProperties | where-object { $_.type -eq $Lead.Type }).initial
+      Properties = ($ADProperties.Where({ $_.type -eq $Lead.Type })).initial
       Filter     = $Lead.Filter ?? "*"
     }
     if ($Lead.SearchBase) { $params.SearchBase = $Lead.SearchBase }

@@ -40,42 +40,42 @@ function Get-AccountDetails {
     if ("user", "computer" -notcontains $Type) { throw "$Type is not a valid account type ! Please use user, or computer" }
 
     # Activity rules
-    $noActivity, $normalActivity, $elevatedActivity, $highActivity, $severeActivity, $criticalActivity = $ADRetreiverData.ADActivityRules
-    $adProps = $ADRetreiverData.ADOProperties.Where({ $_.type -eq $Type })
+    $noActivity, $normalActivity, $elevatedActivity, $highActivity, $severeActivity, $criticalActivity = $ADActivityRules
+    $adProps = $ADProperties.Where({ $_.type -eq $Type })
   }
 
   PROCESS {
     # Defining basic shared properties
     $baseProps = @(
-      @{ n='SAN'                 ; v=($Account.SamAccountName) },
-      @{ n='DomainName'          ; v=((Split-DN $Account.DistinguishedName).Domain) },
-      @{ n='Status'              ; v=($Account.Enabled ? "Enabled" : "Disabled") },
-      @{ n='CreationDate'        ; v=($Account.Created) },
-      @{ n='LastChangeDate'      ; v=($Account.Modified) },
-      @{ n='IsServiceAccount'    ; v=($Account.DistinguishedName -like "*OU=Services*") },
-      @{ n='LastLogonDelta'      ; v=($Account.LastLogonDate ? (Get-Days (Get-Date $Account.LastLogonDate)) : -1) },
-      @{ n='PasswordLastSetDelta'; v=($Account.PasswordLastSet ? (Get-Days (Get-Date $Account.PasswordLastSet)) : -1) }
+      @{ n = 'SAN'                 ; v = ($Account.SamAccountName) },
+      @{ n = 'DomainName'          ; v = ((Split-DN $Account.DistinguishedName).Domain) },
+      @{ n = 'Status'              ; v = ($Account.Enabled ? "Enabled" : "Disabled") },
+      @{ n = 'CreationDate'        ; v = ($Account.Created) },
+      @{ n = 'LastChangeDate'      ; v = ($Account.Modified) },
+      @{ n = 'IsServiceAccount'    ; v = ($Account.DistinguishedName -like "*OU=Services*") },
+      @{ n = 'LastLogonDelta'      ; v = ($Account.LastLogonDate ? (Get-Days (Get-Date $Account.LastLogonDate)) : -1) },
+      @{ n = 'PasswordLastSetDelta'; v = ($Account.PasswordLastSet ? (Get-Days (Get-Date $Account.PasswordLastSet)) : -1) }
     )
     
     [pscustomobject]$props = Add-Properties ([pscustomobject]$Account) $baseProps
 
     # Retreive password and activity rules described in the appropriate CSV file
-    $pwdRule = $ADRetreiverData.ADPwdRules.Where({ ($props.PasswordLastSetDelta -ge $_.periodStart) -and ($props.PasswordLastSetDelta -lt $_.periodEnd) })
-    $activityRule = $ADRetreiverData.ADActivityRules.Where({ ($props.LastLogonDelta -ge $_.periodStart) -and ($props.LastLogonDelta -lt $_.periodEnd) })
+    $pwdRule = $ADPasswordRules.Where({ ($props.PasswordLastSetDelta -ge $_.periodStart) -and ($props.PasswordLastSetDelta -lt $_.periodEnd) })
+    $activityRule = $ADActivityRules.Where({ ($props.LastLogonDelta -ge $_.periodStart) -and ($props.LastLogonDelta -lt $_.periodEnd) })
 
     # Adding more shared properties: Activity (30d, 90d, 180d, 360d), password status, activity period
     $hasAlreadyLogged = ($props.LastLogonDelta -gt -1)
     $activityProps = @(
-      @{ n='PasswordShouldBeReset'; v=([bool]$pwdRule.ShouldCHange) },
-      @{ n='ActivityPeriod'       ; v=([int]$activityRule.periodEnd) },
-      @{ n='ActivityRule'         ; v=($activityRule) },
-      @{ n='PwdRule'              ; v=($pwdRule) }
+      @{ n = 'PasswordShouldBeReset'; v = ([bool]$pwdRule.ShouldCHange) },
+      @{ n = 'ActivityPeriod'       ; v = ([int]$activityRule.periodEnd) },
+      @{ n = 'ActivityRule'         ; v = ($activityRule) },
+      @{ n = 'PwdRule'              ; v = ($pwdRule) }
     )
 
     $props = Add-Properties $props $activityProps
 
     foreach ($activity in @($normalActivity, $elevatedActivity, $highActivity, $severeActivity)) {
-      $props = Add-Properties $props @{ n="Active ($($activity.periodEnd)d)"; v=($hasAlreadyLogged -and ($props.LastLogonDelta -le $activity.periodEnd)) }
+      $props = Add-Properties $props @{ n = "Active ($($activity.periodEnd)d)"; v = ($hasAlreadyLogged -and ($props.LastLogonDelta -le $activity.periodEnd)) }
     }
 
     # Complete properties with health and type related data

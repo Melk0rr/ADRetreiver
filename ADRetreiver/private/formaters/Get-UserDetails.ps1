@@ -31,16 +31,16 @@ function Get-UserDetails {
 
   PROCESS {
     # Checks if the current account is a privileged account
-    $isAdmin = $ADRetreiverData.ADAdmins.DistinguishedName.Contains($Account.DistinguishedName)
+    $isAdmin = $ADAdmins.DistinguishedName.Contains($Account.DistinguishedName)
 
     # Check if current account object is a nominative account
     $isPerson = ($Account.Surname -match $nameReg) -and ($Account.GivenName -match $nameReg) -and !$Account.IsServiceAccount
 
     # Add user properties
     $newProps = @(
-      @{ n='Email'      ; v=($Account.UserPrincipalName ? $Account.UserPrincipalName.ToLower() : $null) },
-      @{ n='AccountType'; v=($isPerson ? "Person" : $Account.IsServiceAccount ? "Service" : "Other") },
-      @{ n='Permissions'; v=($isAdmin ? "Admin" : "Default") }
+      @{ n = 'Email'      ; v = ($Account.UserPrincipalName ? $Account.UserPrincipalName.ToLower() : $null) },
+      @{ n = 'AccountType'; v = ($isPerson ? "Person" : $Account.IsServiceAccount ? "Service" : "Other") },
+      @{ n = 'Permissions'; v = ($isAdmin ? "Admin" : "Default") }
     )
 
     $Account = Add-Properties $Account $newProps

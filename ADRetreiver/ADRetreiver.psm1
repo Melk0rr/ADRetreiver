@@ -1,10 +1,12 @@
 $public = @( Get-ChildItem -Path "$PSScriptRoot\public\*.ps1" )
+$conf = @( Get-ChildItem -Path "$PSScriptRoot\public\conf\*.ps1" )
 $private = @( Get-ChildItem -Path "$PSScriptRoot\private\*.ps1" -Recurse )
 
-@($public + $private) | foreach-object {
+@($public + $conf + $private) | foreach-object {
   try {
     . $_.FullName
-  } catch {
+  }
+  catch {
     Write-Error -Message "Failed to import function $($_.FullName): $_"
   }
 }

@@ -68,6 +68,8 @@
     $domain = Get-ADDomain; $domainRoot = $domain.DNSRoot
     if (!$domain) { throw "Sorry but I can't find any domain..." }
 
+    $ADAdmins = Get-ADUser -Filter { (AdminCount -eq 1) -and (Enabled -eq $true) }
+
     $startTime = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
     Write-Host "If my scent is right, we are on $domainRoot domain !"

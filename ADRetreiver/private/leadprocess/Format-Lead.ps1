@@ -32,7 +32,7 @@ function Format-Lead {
     [int]  $LeadNumber
   )
 
-  BEGIN { Write-Host "Investigating lead n°$LeadNumber..." }
+  BEGIN { Write-Host "Lead n°$LeadNumber..." }
 
   PROCESS {
     # Retreive data

@@ -25,7 +25,7 @@ function Get-GPODetails {
   )
 
   BEGIN {
-    $adProps = $ADRetreiverData.ADOProperties.Where({ $_.Type -eq "gpo" })
+    $adProps = $ADProperties.Where({ $_.Type -eq "gpo" })
   }
 
   PROCESS {
@@ -36,7 +36,7 @@ function Get-GPODetails {
     }
     catch { Write-Error "Error while trying to retreive OUs impacted by GPO $($GPO.DisplayName)" }
 
-    $props = $GPO | select-object *,` @{n='ImpactedOUs'; e={ $impactedOUs }},` @{n='ID'; e={$_.Id}},` @{n='Name'; e={$_.DisplayName}} -ExcludeProperty Id, DisplayName
+    $props = $GPO | select-object *, @{n = 'ImpactedOUs'; e = { $impactedOUs } }, @{n = 'ID'; e = { $_.Id } }, @{n = 'Name'; e = { $_.DisplayName } } -ExcludeProperty Id, DisplayName
   }
 
   END { return $props | select-object $adProps.final }

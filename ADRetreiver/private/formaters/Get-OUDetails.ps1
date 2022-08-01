@@ -24,14 +24,14 @@ function Get-OUDetails {
     [object]  $OU
   )
 
-  BEGIN { $adProps = $ADRetreiverData.ADOProperties.Where({ ($_.Type -eq "ou") }) }
+  BEGIN { $adProps = $ADProperties.Where({ ($_.Type -eq "ou") }) }
 
   PROCESS {
-    $props = $OU | select-object *,`
-      @{n='DomainName'; e={ (Split-DN $OU.DistinguishedName).Domain }}
-      @{n='Users'; e={ Get-ADUser -SearchBase $OU -Filter * }},`
-      @{n='Computers'; e={ Get-ADComputer -SearchBase $OU -Filter * }},`
-      @{n='SubOUs'; e={ Get-ADOrganizationalUnit -SearchBase $OU -Filter * }}
+    $props = $OU | select-object *, `
+    @{n = 'DomainName'; e = { (Split-DN $OU.DistinguishedName).Domain } }
+    @{n = 'Users'; e = { Get-ADUser -SearchBase $OU -Filter * } }, `
+    @{n = 'Computers'; e = { Get-ADComputer -SearchBase $OU -Filter * } }, `
+    @{n = 'SubOUs'; e = { Get-ADOrganizationalUnit -SearchBase $OU -Filter * } }
   }
 
   END { return $props | select-object $adProps.final }
