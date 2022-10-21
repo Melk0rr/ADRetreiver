@@ -78,12 +78,14 @@
 
   BEGIN {
 
-    if ($Help.IsPresent()) {
-      return $helpInfos
+    if ($Help.IsPresent) {
+      Write-Host $helpInfos
+      continue
     }
 
     if ($Version.IsPresent) {
-      return $MyInvocation.MyCommand.ScriptBlock.Module.Version
+      Write-Host (Get-ModuleVersion)
+      continue
     }
 
     $scriptBanner = $MinBanner.IsPresent ? $bannerMin : $banner
