@@ -78,6 +78,7 @@
 
   BEGIN {
 
+    # If using help or version options, just write and exit
     if ($Help.IsPresent) {
       Write-Host $helpInfos
       continue
