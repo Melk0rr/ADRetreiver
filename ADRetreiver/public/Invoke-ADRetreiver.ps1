@@ -57,10 +57,35 @@
       ValueFromPipelineByPropertyName = $false
     )]
     [ValidateNotNullOrEmpty()]
-    [int]  $Timeout = 300
+    [int]  $Timeout = 300,
+
+    [Parameter(
+      Mandatory = $false,
+      ValueFromPipeline = $false,
+      ValueFromPipelineByPropertyName = $false
+    )]
+    [ValidateNotNullOrEmpty()]
+    [switch]  $Help,
+
+    [Parameter(
+      Mandatory = $false,
+      ValueFromPipeline = $false,
+      ValueFromPipelineByPropertyName = $false
+    )]
+    [ValidateNotNullOrEmpty()]
+    [switch]  $Version
   )
 
   BEGIN {
+
+    if ($Help.IsPresent()) {
+      return $helpInfos
+    }
+
+    if ($Version.IsPresent) {
+      return $MyInvocation.MyCommand.ScriptBlock.Module.Version
+    }
+
     $scriptBanner = $MinBanner.IsPresent ? $bannerMin : $banner
     if (!$HideBanner.IsPresent) { Write-Host $scriptBanner -f DarkYellow }
 
