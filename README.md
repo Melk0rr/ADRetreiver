@@ -49,7 +49,7 @@ Alternatively, you can just import it directly from the project directory with:
 
 ## Usage
       Usage:
-        Invoke-ADRetreiver (-Leads) [-Timeout]
+        Invoke-ADRetreiver (-Leads) [-HideBannerMinBannerTimeout]
         Invoke-ADRetreiver -Help
         Invoke-ADRetreiver (-Version)
         
@@ -57,7 +57,7 @@ Alternatively, you can just import it directly from the project directory with:
         -Help                          show this help message and exit
         -HideBanner                    hide the banner
         -Leads                         set leads for the script to explore
-        -MinBanners                    replace default banner with minnimal version
+        -MinBanner                     replace default banner with minnimal version
         -Timeout                       set a timeout fot AD query
         -Version                       show version and exit
       
