@@ -1,4 +1,4 @@
-$helpInfos = @"
+$docString = @"
 Usage:
   Invoke-ADRetreiver (-Leads) [-HideBannerMinBannerTimeout]
   Invoke-ADRetreiver -Help
