@@ -5,8 +5,8 @@ function Split-DN ([string] $dn) {
   [array]$domCNs = $splitDN.Where({ $_ -like "CN=*" })
 
   return [PSCustomObject]@{
-    Name   = $domCNs ? $domCNs[0].Trim('CN=') : $null
-    OUs    = $domOUs ? $domOUs.Trim('OU=') : $null
-    Domain = $domDCs ? ($domDCs.Trim('DC=') -join '.') : $null
+    CN     = $domCNs ? $domCNs[0].Replace("CN=", "") : $null
+    OUs    = $domOUs ? $domOUs.Replace("OU=", "") : $null
+    Domain = $domDCs ? ($domDCs.Replace("DC=", "") -join '.') : $null
   }
 }
