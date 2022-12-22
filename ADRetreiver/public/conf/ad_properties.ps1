@@ -1,17 +1,18 @@
 $ADProperties = @(
   # User properties
   @{
-    Type    = "user";
+    Type    = "user"
     Initial = @(
       "Created",
       "Description",
+      "EmailAddress",
       "Title",
       "LastLogonDate",
       "Modified",
       "PasswordLastSet",
       "PasswordNotRequired",
       "PasswordNeverExpires"
-    );
+    )
     Final   = @(
       "DistinguishedName",
       "SAN",
@@ -47,7 +48,7 @@ $ADProperties = @(
 
   # Computer properties
   @{
-    Type    = "computer";
+    Type    = "computer"
     Initial = @(
       "LastLogonDate",
       "Created",
@@ -59,7 +60,7 @@ $ADProperties = @(
       "PasswordNotRequired",
       "PasswordNeverExpires",
       "Description"
-    );
+    )
     Final   = @(
       "DistinguishedName",
       "SAN",
@@ -99,14 +100,14 @@ $ADProperties = @(
 
   # Group properties
   @{
-    Type    = "group";
+    Type    = "group"
     Initial = @(
       "CN",
       "Created",
       "Modified",
       "Description",
       "MemberOf"
-    );
+    )
     Final   = @(
       "DistinguishedName",
       "Name",
@@ -124,10 +125,10 @@ $ADProperties = @(
 
   # GPO properties
   @{
-    Type    = "gpo";
+    Type    = "gpo"
     Initial = @(
 
-    );
+    )
     Final   = @(
       "Name",
       "Id",
@@ -142,13 +143,13 @@ $ADProperties = @(
 
   # OU properties
   @{
-    Type    = "ou";
+    Type    = "ou"
     Initial = @(
       "Created",
       "Modified",
       "Description",
       "GPLink"
-    );
+    )
     Final   = @(
       "DistinguishedName",
       "Name",
@@ -165,12 +166,12 @@ $ADProperties = @(
 
   # Object properties
   @{
-    Type    = "object";
+    Type    = "object"
     Initial = @(
       "Created",
       "Modified",
       "Description"
-    );
+    )
     Final   = @(
       "DistinguishedName",
       "Name",
