@@ -100,7 +100,7 @@
 
     $startTime = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
-    Write-Host "If my scent is right, we are on $domainRoot domain !"
+    Write-Host "If my scent is right, we are on domain $domainRoot !"
     Write-Host "* Starting the work $startTime *"
 
     $index, $res = 1, @()

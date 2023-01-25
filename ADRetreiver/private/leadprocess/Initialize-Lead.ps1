@@ -93,7 +93,7 @@ function Initialize-Lead {
           default { Get-ADObject @p }
         }
       }
-      catch { Write-Host "`n-- Something went wrong. I could not retreive the informations I was supposed to: `n$_" -f Red }
+      catch { Write-Host "Something went wrong. I could not retreive the informations I was supposed to: `n$_" -f Red }
 
     } -ArgumentList $Lead, $params -Name ADReq
 

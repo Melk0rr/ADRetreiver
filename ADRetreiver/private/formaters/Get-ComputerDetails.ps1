@@ -40,7 +40,19 @@ function Get-ComputerDetails {
 
         # Retreiving build infos from CSV
         $buildInfos = $WinBuilds.Where({ ($_.build -eq $osBuildNumber) -and ($_.type -eq $computerType) })
-        if (!$buildInfos) { throw "Build infos not found !" }
+        if (!$buildInfos) {
+          Write-Error -Message "$($Account.Name) build infos not found !"
+          $buildInfos = @{
+            OS      = $osFamily
+            Name    = $os
+            Type    = ""
+            Build   = ""
+            Version = ""
+            Release = ""
+            EOS     = ""
+            LTSEoS  = ""
+          }
+        }
 
         $osShort = ($computerType -eq "Server") ? "Windows Server $($buildInfos.os)" : "Windows $($buildInfos.os)"
 
