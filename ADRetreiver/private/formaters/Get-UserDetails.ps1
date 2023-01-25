@@ -38,7 +38,7 @@ function Get-UserDetails {
 
     # Add user properties
     $newProps = @(
-      @{ n = 'Email'      ; v = ($Account.UserPrincipalName ? $Account.UserPrincipalName.ToLower() : $null) },
+      @{ n = 'Email'      ; v = ($Account.EmailAddress ? $Account.EmailAddress.ToLower() : $null) },
       @{ n = 'AccountType'; v = ($isPerson ? "Person" : $Account.IsServiceAccount ? "Service" : "Other") },
       @{ n = 'Permissions'; v = ($isAdmin ? "Admin" : "Default") }
     )
