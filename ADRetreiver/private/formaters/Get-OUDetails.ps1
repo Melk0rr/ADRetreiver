@@ -24,15 +24,22 @@ function Get-OUDetails {
     [object]  $OU
   )
 
-  BEGIN { $adProps = $ADProperties.Where({ ($_.Type -eq "ou") }) }
-
-  PROCESS {
-    $props = $OU | select-object *, `
-    @{n = 'DomainName'; e = { (Split-DN $OU.DistinguishedName).Domain } }
-    @{n = 'Users'; e = { Get-ADUser -SearchBase $OU -Filter * } }, `
-    @{n = 'Computers'; e = { Get-ADComputer -SearchBase $OU -Filter * } }, `
-    @{n = 'SubOUs'; e = { Get-ADOrganizationalUnit -SearchBase $OU -Filter * } }
+  BEGIN {
+    [object]$adProps = $ADProperties.Where({ ($_.Type -eq "ou") })[0]
   }
 
-  END { return $props | select-object $adProps.final }
+  PROCESS {
+    $ouProps = @{
+      DomainName = (Split-DN $OU.DistinguishedName).Domain
+      Users      = Get-ADUser -SearchBase $OU -Filter *
+      Computers  = Get-ADComputer -SearchBase $OU -Filter *
+      SubOUs     = Get-ADOrganizationalUnit -SearchBase $OU -Filter *
+    }
+
+    [pscustomobject]$OU = Add-Properties $OU $ouProps
+  }
+
+  END {
+    return $OU | select-object $adProps.final
+  }
 }

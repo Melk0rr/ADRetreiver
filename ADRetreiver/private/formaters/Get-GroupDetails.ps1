@@ -33,17 +33,21 @@ function Get-GroupDetails {
   )
 
   BEGIN {
-    $adProps = $ADProperties.Where({ $_.Type -eq "group" })
+    [object]$adProps = $ADProperties.Where({ $_.Type -eq "group" })[0]
 
     # Handle parameters
-    $memberParams = @{ Identity = $Group.DistinguishedName }
-    if ($RecursiveMembers.IsPresent) { $memberParams.Add('Recursive', $RecursiveMembers) }
+    $memberParams = @{
+      Identity = $Group.DistinguishedName
+    }
+    if ($RecursiveMembers.IsPresent) {
+      $memberParams.Add('Recursive', $RecursiveMembers)
+    }
   }
 
   PROCESS {
-    $members = Get-ADGroupMember @memberParams
+    [object[]]$members = Get-ADGroupMember @memberParams
 
-    $props = [pscustomobject]@{
+    [pscustomobject]$props = @{
       DistinguishedName = $Group.DistinguishedName
       Name              = $Group.Name
       SID               = $Group.SID
@@ -58,5 +62,7 @@ function Get-GroupDetails {
     }
   }
 
-  END { return $props | select-object $adProps.final }
+  END {
+    return $props | select-object $adProps.final
+  }
 }
