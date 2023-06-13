@@ -34,35 +34,47 @@ function Get-Health {
 
   BEGIN {
     # Initializing base values
-    $health = 100; $healthFlags = @()
+    [int]$health = 100
+    [string[]]$healthFlags = @()
   }
 
   PROCESS {
     if ($Type -eq "computer") {
       if ($Account.computerType -ne 'Unknown') {
-        $isSupported = @("Ongoing", "Extended").Contains($Account.support)
+        [bool]$isSupported = @("Ongoing", "Extended").Contains($Account.support)
 
         # Remove health if os is no longer supported
         $health -= !$isSupported ? (50 + [math]::truncate((Get-Days (Get-Date $Account.endOfSupportDate)) / 360) * 20) : 0
         $healthFlags += !$isSupported ? "NotSupported" : "Supported"
         
-      } else { $health = 0; $healthFlags += 'NoOSData' }
+      }
+      else { $health = 0; $healthFlags += 'NoOSData' }
     }
 
-    # If the password is not required immediately set health to 0
+    # If the password is not required, immediately set health to 0
     if ($Account.passwordNotRequired) { $health = 0; $healthFlags += "PwdNotRequired" }
+    if ($Account.passwordNeverExpires) { $health -= 50; $healthFlags += "PwdNeverExpires" }
 
     # Remove health if the user has not logged in a while
-    $activityRule = $Account.activityRule; $pwdRule = $Account.pwdRule
+    [object]$activityRule = $Account.activityRule
+    [object]$pwdRule = $Account.pwdRule
+    
     $health -= $isAdmin ? [math]::min(100, [int]$activityRule.healthLoss * 2) : [int]$activityRule.healthLoss
     $healthFlags += $isAdmin ? "Admin$($activityRule.flag)" : $activityRule.flag
 
     # Remove health if password is expired
     $health -= $isAdmin ? [math]::min(100, [int]$pwdRule.healthLoss * 2) : [int]$pwdRule.healthLoss
     $healthFlags += $isAdmin ? "Admin$($pwdRule.flag)" : $pwdRule.flag
+
+    $healthProps = @{
+      Health      = ([math]::max(0, $health))
+      HealthFlags = ($healthFlags -join ';')
+    }
+
+    [pscustomobject]$Account = Add-Properties $Account $healthProps
   }
 
   END { 
-    return ($Account | select-object *,` @{n="Health";e={ [math]::max(0, $health) }},` @{n="HealthFlags";e={ $healthFlags -join ';' }})
+    return $Account
   }
 }

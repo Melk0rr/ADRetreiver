@@ -29,13 +29,15 @@ function Add-Properties {
       ValueFromPipelineByPropertyName = $false
     )]
     [ValidateNotNullOrEmpty()]
-    [object[]]  $Properties
+    [object]  $Properties
   )
 
   BEGIN {}
 
   PROCESS {
-    foreach ($p in $Properties) { $Object | add-member -MemberType NoteProperty -Name $p.n -Value $p.v -Force }
+    foreach ($p in $Properties.keys) {
+      $Object | add-member -MemberType NoteProperty -Name $p -Value $Properties[$p] -Force
+    }
   }
 
   END { return $Object }
