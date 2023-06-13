@@ -6,12 +6,14 @@ $ADProperties = @(
       "Created",
       "Description",
       "EmailAddress",
+      "EmployeeID",
       "Title",
       "LastLogonDate",
       "Modified",
       "PasswordLastSet",
       "PasswordNotRequired",
-      "PasswordNeverExpires"
+      "PasswordNeverExpires",
+      "pwdLastSet"
     )
     Final   = @(
       "DistinguishedName",
@@ -20,6 +22,7 @@ $ADProperties = @(
       "Name",
       "Surname",
       "GivenName",
+      "EmployeeID",
       "Email",
       "DomainName",
       "Status",
@@ -32,6 +35,7 @@ $ADProperties = @(
       "PasswordLastSet",
       "PasswordLastSetDelta",
       "PasswordShouldBeReset",
+      "PasswordChangeAtNextLogon",
       "LastLogonDate",
       "LastLogonDelta",
       "ActivityPeriod",
@@ -78,6 +82,8 @@ $ADProperties = @(
       "@IPv4",
       "HasExtendedSupport",
       "Support",
+      "EndOfSupportDate",
+      "SupportStatus",
       "CreationDate",
       "LastChangeDate",
       "PasswordNotRequired",
