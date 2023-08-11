@@ -85,7 +85,7 @@ function Get-AccountDetails {
 
     foreach ($activity in @($normalActivity, $elevatedActivity, $highActivity, $severeActivity)) {
       $activityPropName = "Active ($($activity.periodEnd)d)"
-      $activityPropValue = ($props.LastLogonDelta -le $activity.periodEnd)
+      $activityPropValue = (($props.LastLogonDelta -gt -1) -and ($props.LastLogonDelta -le $activity.periodEnd))
       $props | add-member -MemberType NoteProperty -Name $activityPropName -Value $activityPropValue -Force
     }
 

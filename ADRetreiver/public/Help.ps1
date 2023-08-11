@@ -2,7 +2,7 @@ $docString = @"
 Usage:
   Invoke-ADRetreiver (-Leads) [-HideBannerMinBannerTimeout]
   Invoke-ADRetreiver -Help
-  Invoke-ADRetreiver (-Version)
+  Invoke-ADRetreiver -Version
   
 Options:
   -Help                          show this help message and exit

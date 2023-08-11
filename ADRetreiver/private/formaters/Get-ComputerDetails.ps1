@@ -45,7 +45,7 @@ function Get-ComputerDetails {
         [string]$osEdition = $osEdition ? $osEdition.name : "Standard"
 
         # Defining Windows Edition class
-        $osEditionClass = "W"
+        $osEditionClass = $computerType -eq "Workstation" ? "W" : "Standard"
         if ($osEdition -like "*Enterprise*") {
           $osEditionClass = "E"
         }
@@ -70,16 +70,20 @@ function Get-ComputerDetails {
         $osShort = ($computerType -eq "Server") ? "Windows Server $($buildInfos.os)" : "Windows $($buildInfos.os)"
 
         # Multiple checks relative to end of support
-        [datetime]$endOfSupportDate = (Get-Date $buildInfos.SecuritySupport)
-        [int]$supportEndsIn = (Get-Days $endOfSupportDate -reverse)
-        [string]$support = ($supportEndsIn -ge 0) ? "Ongoing" : "Retired"
+        try {
+          [datetime]$endOfSupportDate = (Get-Date $buildInfos.SecuritySupport)
+          [int]$supportEndsIn = (Get-Days $endOfSupportDate -reverse)
+          [string]$support = ($supportEndsIn -ge 0) ? "Ongoing" : "Retired"
 
-        [string]$supportStatus = if ($support -eq "Ongoing") {
-          "Ends in $supportEndsIn days"
-        } else {
-          "Ended $(-$supportEndsIn) days ago"
+          [string]$supportStatus = if ($support -eq "Ongoing") {
+            "Ends in $supportEndsIn days"
+          } else {
+            "Ended $(-$supportEndsIn) days ago"
+          }
         }
-
+        catch {
+          Write-Warning "Missing support data for $($Account.name)"
+        }
       }
       elseif ($os -like "*Linux*") {
         $osFamily = "Linux"
