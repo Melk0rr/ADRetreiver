@@ -67,7 +67,7 @@ $WinBuilds = @{
         SecuritySupport = "2027-01-12"
       }
 
-      E   = @{
+      E = @{
         OS              = "10"
         Version         = "21H2"
         Release         = "2021-11-16"
@@ -75,7 +75,7 @@ $WinBuilds = @{
         SecuritySupport = "2024-07-11"
       }
 
-      W   = @{
+      W = @{
         OS              = "10"
         Version         = "21H2"
         Release         = "2021-11-16"
@@ -178,7 +178,7 @@ $WinBuilds = @{
         SecuritySupport = "2029-01-09"
       }
     
-      E   = @{
+      E = @{
         OS              = "10"
         Version         = "1809"
         Release         = "2018-11-13"
@@ -186,7 +186,7 @@ $WinBuilds = @{
         SecuritySupport = "2021-05-11"
       }
     
-      W   = @{
+      W = @{
         OS              = "10"
         Version         = "1809"
         Release         = "2018-11-13"
@@ -258,7 +258,7 @@ $WinBuilds = @{
         SecuritySupport = "2026-10-13"
       }
     
-      E   = @{
+      E = @{
         OS              = "10"
         Version         = "1607"
         Release         = "2016-08-02"
@@ -266,7 +266,7 @@ $WinBuilds = @{
         SecuritySupport = "2019-04-09"
       }
     
-      W   = @{
+      W = @{
         OS              = "10"
         Version         = "1607"
         Release         = "2016-08-02"
@@ -302,7 +302,7 @@ $WinBuilds = @{
         SecuritySupport = "2025-10-14"
       }
     
-      E   = @{
+      E = @{
         OS              = "10"
         Version         = "1507"
         Release         = "2015-07-29"
@@ -310,7 +310,7 @@ $WinBuilds = @{
         SecuritySupport = "2017-05-09"
       }
 
-      W   = @{
+      W = @{
         OS              = "10"
         Version         = "1507"
         Release         = "2015-07-29"
@@ -320,7 +320,7 @@ $WinBuilds = @{
     }
   
     # Windows 8
-    9600  = @{
+    9600 = @{
       E = @{
         OS              = "8.1"
         Version         = "6.3"
@@ -338,7 +338,7 @@ $WinBuilds = @{
       }
     }
   
-    9200  = @{
+    9200 = @{
       E = @{
         OS              = "8"
         Version         = "6.2"
@@ -357,7 +357,7 @@ $WinBuilds = @{
     }
   
     # Windows 7
-    7601  = @{
+    7601 = @{
       E = @{
         OS              = "7"
         Version         = "6.1"
@@ -375,7 +375,7 @@ $WinBuilds = @{
       }
     }
   
-    7600  = @{
+    7600 = @{
       E = @{
         OS              = "7"
         Version         = "6.1"
@@ -394,7 +394,7 @@ $WinBuilds = @{
     }
   
     # Windows XP
-    2600  = @{
+    2600 = @{
       E = @{
         OS              = "XP"
         Version         = "5.1"
@@ -415,10 +415,10 @@ $WinBuilds = @{
 
   #############################################################
   ################# Windows Server
-  Server      = @{
+  Server = @{
     # Windows Server 2022
     20348 = @{
-      LTS      = @{
+      LTS = @{
         OS              = "2022"
         Version         = "2022"
         Release         = "2021-08-18"
@@ -437,7 +437,7 @@ $WinBuilds = @{
 
     # Windows Server 2019
     17763 = @{
-      LTS      = @{
+      LTS = @{
         OS              = "2019"
         Version         = "1809"
         Release         = "2018-11-13"
@@ -456,7 +456,7 @@ $WinBuilds = @{
 
     # Windows Server 2016
     14393 = @{
-      LTS      = @{
+      LTS = @{
         OS              = "2016"
         Version         = "1607"
         Release         = "2016-10-15"
@@ -474,8 +474,8 @@ $WinBuilds = @{
     }
 
     # Windows Server 2012
-    9600  = @{
-      LTS      = @{
+    9600 = @{
+      LTS = @{
         OS              = "2012 R2"
         Version         = "6.3"
         Release         = "2013-11-25"
@@ -492,8 +492,8 @@ $WinBuilds = @{
       }
     }
 
-    9200  = @{
-      LTS      = @{
+    9200 = @{
+      LTS = @{
         OS              = "2012"
         Version         = "6.2"
         Release         = "2012-10-30"
@@ -511,8 +511,8 @@ $WinBuilds = @{
     }
 
     # Windows Server 2008
-    7601  = @{
-      LTS      = @{
+    7601 = @{
+      LTS = @{
         OS              = "2008 R2 SP1"
         Version         = "6.1"
         Release         = "2011-02-22"
@@ -529,8 +529,8 @@ $WinBuilds = @{
       }
     }
 
-    7600  = @{
-      LTS      = @{
+    7600 = @{
+      LTS = @{
         OS              = "2008 R2"
         Version         = "6.0"
         Release         = "2009-10-22"
@@ -547,8 +547,8 @@ $WinBuilds = @{
       }
     }
 
-    6003  = @{
-      LTS      = @{
+    6003 = @{
+      LTS = @{
         OS              = "2008 SP2"
         Version         = "6.0"
         Release         = "2019-04-29"
@@ -565,8 +565,8 @@ $WinBuilds = @{
       }
     }
 
-    6001  = @{
-      LTS      = @{
+    6001 = @{
+      LTS = @{
         OS              = "2008"
         Version         = "6.0"
         Release         = "2008-05-06"
@@ -584,8 +584,8 @@ $WinBuilds = @{
     }
 
     # Windows Server 2003
-    3790  = @{
-      LTS      = @{
+    3790 = @{
+      LTS = @{
         OS              = "2003"
         Version         = "5.2"
         Release         = "2003-04-24"
@@ -603,8 +603,8 @@ $WinBuilds = @{
     }
 
     # Windows Server 2000
-    2195  = @{
-      LTS      = @{
+    2195 = @{
+      LTS = @{
         OS              = "2000"
         Version         = "5.0"
         Release         = "2000-02-17"
