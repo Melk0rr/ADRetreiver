@@ -53,12 +53,13 @@ function Get-AccountDetails {
   PROCESS {
     # Defining basic shared properties
     $baseProps = @{
+      Name                 = ($Account.Name.Replace("`n", ""))
       SAN                  = ($Account.SamAccountName)
       DomainName           = ((Split-DN $Account.DistinguishedName).Domain)
       Status               = ($Account.Enabled ? "Enabled" : "Disabled")
       CreationDate         = ($Account.Created)
       LastChangeDate       = ($Account.Modified)
-      IsServiceAccount     = ($Account.DistinguishedName -like "*OU=Services*")
+      IsServiceAccount     = ($Account.SamAccountName -like "svc*")
       LastLogonDelta       = ($Account.LastLogonDate ? (Get-Days (Get-Date $Account.LastLogonDate)) : -1)
       PasswordLastSetDelta = ($Account.PasswordLastSet ? (Get-Days (Get-Date $Account.PasswordLastSet)) : -1)
     }
@@ -85,7 +86,7 @@ function Get-AccountDetails {
 
     foreach ($activity in @($normalActivity, $elevatedActivity, $highActivity, $severeActivity)) {
       $activityPropName = "Active ($($activity.periodEnd)d)"
-      $activityPropValue = ($props.LastLogonDelta -le $activity.periodEnd)
+      $activityPropValue = (($props.LastLogonDelta -gt -1) -and ($props.LastLogonDelta -le $activity.periodEnd))
       $props | add-member -MemberType NoteProperty -Name $activityPropName -Value $activityPropValue -Force
     }
 

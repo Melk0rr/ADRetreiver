@@ -34,13 +34,14 @@ function Get-UserDetails {
     [bool]$isAdmin = $ADAdmins.DistinguishedName.Contains($Account.DistinguishedName)
 
     # Check if current account object is a nominative account
-    [bool]$isPerson = ($Account.Surname -match $nameReg) -and ($Account.GivenName -match $nameReg) -and !$Account.IsServiceAccount
+    [bool]$isPerson = ($Account.Surname -match $nameReg) -and ($Account.GivenName -match $nameReg) -and ($Account.Name -match $nameReg)
 
     # Add user properties
     $newProps = @{
-      Email       = ($Account.EmailAddress ? $Account.EmailAddress.ToLower() : $null)
-      AccountType = ($isPerson ? "Person" : $Account.IsServiceAccount ? "Service" : "Other")
-      Permissions = ($isAdmin ? "Admin" : "Default")
+      Email                     = ($Account.EmailAddress ? $Account.EmailAddress.ToLower() : $null)
+      AccountType               = ($Account.IsServiceAccount ? "Service" : $isPerson ? "Person" : "Other")
+      PasswordChangeAtNextLogon = ($Account.pwdLastSet -eq 0)
+      Permissions               = ($isAdmin ? "Admin" : "Default")
     }
 
     [pscustomobject]$Account = Add-Properties $Account $newProps

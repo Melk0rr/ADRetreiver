@@ -2,7 +2,7 @@ $ADActivityRules = @(
   @{
     Label       = "None";
     PeriodStart = -1;
-    PeriodEnd   = 0;
+    PeriodEnd   = -1;
     HealthLoss  = 80;
     Flag        = "NeverActive"
   },
