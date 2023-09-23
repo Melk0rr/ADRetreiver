@@ -46,7 +46,7 @@ function Get-ComputerDetails {
 
         # Defining Windows Edition class
         $osEditionClass = $computerType -eq "Workstation" ? "W" : "Standard"
-        if ($osEdition -like "*Enterprise*") {
+        if (($osEdition -like "*Enterprise*") -and ($computerType -eq "Workstation")) {
           $osEditionClass = "E"
         }
         if ($extendedSupport) {
@@ -99,18 +99,18 @@ function Get-ComputerDetails {
 
     # Add computer properties
     $newProps = @{
-      ComputerType        = $computerType
-      OSFamily            = $osFamily
-      OSShort             = $osShort
-      OSFull              = $os
-      OSEdition           = $osEdition
-      OSVersion           = $buildInfos.Version
-      OSBuild             = $osBuildNumber
+      ComputerType        = $computerType ?? "Unknown"
+      OSFamily            = $osFamily ?? "Unknown"
+      OSShort             = $osShort ?? "Unknown"
+      OSFull              = $os ?? "Unknown"
+      OSEdition           = $osEdition ?? "Unknown"
+      OSVersion           = $buildInfos.Version ?? "Unknown"
+      OSBuild             = $osBuildNumber ?? "Unknown"
       "@IPv4"             = $Account.IPV4Address
       HasExtendedSupport  = $extendedSupport
-      Support             = $support
+      Support             = $support ?? "Unknown"
       EndOfSupportDate    = $endOfSupportDate
-      SupportStatus       = $supportStatus
+      SupportStatus       = $supportStatus ?? "Unknown"
     }
 
     [pscustomobject]$Account = Add-Properties $Account $newProps

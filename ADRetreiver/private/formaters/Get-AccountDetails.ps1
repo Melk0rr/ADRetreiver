@@ -53,6 +53,7 @@ function Get-AccountDetails {
   PROCESS {
     # Defining basic shared properties
     $baseProps = @{
+      Name                 = ($Account.Name.Replace("`n", ""))
       SAN                  = ($Account.SamAccountName)
       DomainName           = ((Split-DN $Account.DistinguishedName).Domain)
       Status               = ($Account.Enabled ? "Enabled" : "Disabled")
