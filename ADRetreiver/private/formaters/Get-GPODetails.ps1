@@ -25,19 +25,29 @@ function Get-GPODetails {
   )
 
   BEGIN {
-    $adProps = $ADProperties.Where({ $_.Type -eq "gpo" })
+    [object]$adProps = $ADProperties.Where({ $_.Type -eq "gpo" })[0]
   }
 
   PROCESS {
 
     try {
-      $ouWithLink = Get-ADOrganizationalUnit -Filter * -Properties gpLink
-      $impactedOUs = $ouWithLink.Where({ $_.gpLink -like "*$($GPO.id)*" })
+      [object[]]$ouWithLink = Get-ADOrganizationalUnit -Filter * -Properties gpLink
+      [object[]]$impactedOUs = $ouWithLink.Where({ $_.gpLink -like "*$($GPO.id)*" })
     }
-    catch { Write-Error "Error while trying to retreive OUs impacted by GPO $($GPO.DisplayName)" }
+    catch {
+      Write-Error "Error while trying to retreive OUs impacted by GPO $($GPO.DisplayName)"
+    }
 
-    $props = $GPO | select-object *, @{n = 'ImpactedOUs'; e = { $impactedOUs } }, @{n = 'ID'; e = { $_.Id } }, @{n = 'Name'; e = { $_.DisplayName } } -ExcludeProperty Id, DisplayName
+    $gpoProps = @{
+      ImpactedOUs = $impactedOUs
+      ID          = $GPO.ID
+      Name        = $GPO.DisplayName
+    }
+
+    [pscustomobject]$GPO = Add-Properties $GPO $gpoProps
   }
 
-  END { return $props | select-object $adProps.final }
+  END {
+    return $GPO | select-object $adProps.final
+  }
 }

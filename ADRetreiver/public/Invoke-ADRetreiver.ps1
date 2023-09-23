@@ -89,21 +89,22 @@
       continue
     }
 
-    $scriptBanner = $MinBanner.IsPresent ? $bannerMin : $banner
+    [string]$scriptBanner = $MinBanner.IsPresent ? $bannerMin : $banner
     if (!$HideBanner.IsPresent) { Write-Host $scriptBanner -f DarkYellow }
 
     # Retreiving domain name
-    $domain = Get-ADDomain; $domainRoot = $domain.DNSRoot
+    $domain = Get-ADDomain
+    [string]$domainRoot = $domain.DNSRoot
     if (!$domain) { throw "Sorry but I can't find any domain..." }
 
-    $ADAdmins = Get-ADUser -Filter { (AdminCount -eq 1) -and (Enabled -eq $true) }
+    [object[]]$ADAdmins = Get-ADUser -Filter { (AdminCount -eq 1) -and (Enabled -eq $true) }
 
-    $startTime = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    [datetime]$startTime = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
     Write-Host "If my scent is right, we are on domain $domainRoot !"
     Write-Host "* Starting the work $startTime *"
 
-    $index, $res = 1, @()
+    [int]$index, [pscustomobject[]]$res = 1, @()
   }
 
   PROCESS {
@@ -116,7 +117,7 @@
   }
 
   END {
-    $endTime = Get-Date
+    [datetime]$endTime = Get-Date
     Write-Host "I'm done exploring all leads !" -f Green
     Write-Host "Investigation took me $(Get-TimeDiff $startTime $endTime)"
 

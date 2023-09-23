@@ -6,10 +6,21 @@ $WinBuilds = @(
     OS      = "11"
     Name    = "Windows 11"
     Type    = "Workstation"
+    Build   = "22621"
+    Version = "22H2"
+    Release = "2022-09"
+    EOS     = "2025-10"
+    LTSEoS  = "2032-01"
+  },
+
+  @{
+    OS      = "11"
+    Name    = "Windows 11"
+    Type    = "Workstation"
     Build   = "22000"
     Version = "21H2"
-    Release = "2021-12"
-    EOS     = "2023-10"
+    Release = "2021-04"
+    EOS     = "2024-10"
     LTSEoS  = "2032-01"
   },
 

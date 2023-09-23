@@ -37,16 +37,26 @@ function Initialize-Lead {
       ValueFromPipelineByPropertyName = $false
     )]
     [ValidateNotNullOrEmpty()]
-    [int]  $WaitStep = 5
+    [int]  $WaitStep = 5,
+
+    [Parameter(
+      Mandatory = $false,
+      ValueFromPipeline = $false,
+      ValueFromPipelineByPropertyName = $false
+    )]
+    [ValidateNotNullOrEmpty()]
+    [char]  $WaitChar = "."
   )
 
   BEGIN {
 
     # Checking if a correct Type value has been provided
-    if (!$Lead.Type) { throw "I don't know what I'm looking for..." }
+    if (!$Lead.Type) {
+      throw "I don't know what I'm looking for..."
+    }
 
     # Retreiving domain name
-    $domain = (Get-ADDomain).DNSRoot
+    [string]$domain = (Get-ADDomain).DNSRoot
 
     if ("object", "user", "computer", "group", "gpo", "ou" -notcontains $Lead.Type) {
       throw "I don't recognize $($Lead.Type) lead... I can only investigate the following types: object, user, group, computer, ou."
@@ -57,7 +67,9 @@ function Initialize-Lead {
       Properties = ($ADProperties.Where({ $_.type -eq $Lead.Type })).initial
       Filter     = $Lead.Filter ?? "*"
     }
-    if ($Lead.SearchBase) { $params.SearchBase = $Lead.SearchBase }
+    if ($Lead.SearchBase) {
+      $params.SearchBase = $Lead.SearchBase
+    }
   }
 
   PROCESS {
@@ -71,45 +83,77 @@ function Initialize-Lead {
       try {
         # Type dependent AD requests
         switch ($l.Type) {
-          "user" { Get-ADUser @p }
-          "computer" { Get-ADComputer @p }
-          "group" { Get-ADGroup @p }
-          "ou" { Get-ADOrganizationalUnit @p }
+          "user" {
+            Get-ADUser @p
+          }
+
+          "computer" {
+            Get-ADComputer @p
+          }
+
+          "group" {
+            Get-ADGroup @p
+          }
+
+          "ou" {
+            Get-ADOrganizationalUnit @p
+          }
+
           "gpo" {
-            # Get-GPO is semantically different from other Get-ADxx functions
+            # Get-GPO is semantically different from other Get-ADxx functions : it relly on GroupPolicy module
             if ($l.Filter -ne "*") {
               $checkGroupPolicy = Get-Command -Module GroupPolicy
 
               if ($checkGroupPolicy) {
-                $prop, $val = $l.Filter -split ' -eq '
-                if (!$val) { throw "GPO name must be precise: use '-eq' operator !" }; if ($prop -ne "Name") { throw "I can only search GPOs by Name !" }
+                [string]$prop, $val = $l.Filter -split ' -eq '
+
+                if (!$val) {
+                  throw "GPO name must be precise: use '-eq' operator !"
+                }
+                
+                if ($prop -ne "Name") {
+                  throw "I can only search GPOs by Name !"
+                }
   
                 Get-GPO ($val.Trim('"', "'")) 
               }
-              else { throw "GroupPolicy Module was not found !" }
+              else {
+                throw "GroupPolicy Module was not found !"
+              }
             }
-            else { Get-GPO -All }
+            else {
+              Get-GPO -All
+            }
           }
-          default { Get-ADObject @p }
+          
+          default {
+            Get-ADObject @p
+          }
         }
       }
-      catch { Write-Host "Something went wrong. I could not retreive the informations I was supposed to: `n$_" -f Red }
+      catch {
+        Write-Host "`n-- Something went wrong. I could not retreive the informations I was supposed to: `n$_" -f Red
+      }
 
     } -ArgumentList $Lead, $params -Name ADReq
 
     # Waiting indicator
     while ("Completed", "Failed" -notcontains $job.State) {
-      Write-Host '.' -NoNewline
+      Write-Host $WaitChar -NoNewline
 
       # If timeout is reached, cancel
       $Timeout -= $WaitStep
-      if ($Timeout -le 0) { Write-Host "Uhh it's taking me too much time... Better continue." -f Red }
+      if ($Timeout -le 0) {
+        Write-Host "Uhh it's taking me too much time... Better continue." -f Red
+      }
 
       Start-Sleep -Seconds $waitStep
     }
 
-    [array]$res = Receive-Job $job -Wait
+    [object[]]$res = Receive-Job $job -Wait
   }
 
-  END { return $res }
+  END {
+    return $res
+  }
 }

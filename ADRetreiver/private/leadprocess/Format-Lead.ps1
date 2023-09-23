@@ -21,7 +21,7 @@ function Format-Lead {
       ValueFromPipelineByPropertyName = $false
     )]
     [ValidateNotNullOrEmpty()]
-    [object]  $Lead,
+    [pscustomobject]  $Lead,
 
     [Parameter(
       Mandatory = $true,
@@ -32,27 +32,35 @@ function Format-Lead {
     [int]  $LeadNumber
   )
 
-  BEGIN { Write-Host "Lead n°$LeadNumber..." }
+  BEGIN {
+    Write-Host "Lead n°$LeadNumber..." -NoNewline
+    $lead = [pscustomobject]$lead
+  }
 
   PROCESS {
     # Retreive data
     if (!$lead.Data) {
-      $lead | add-member -MemberType NoteProperty -Name 'Data' -Value (Initialize-Lead -Lead $lead -Timeout $Timeout)
+      [pscustomobject[]]$leadQueryData = (Initialize-Lead -Lead $lead -Timeout $Timeout)
+      $lead | add-member -MemberType NoteProperty -Name "Data" -Value $leadQueryData -Force
     }
-    else { Write-Host "Oh, you already have infos for this lead !" }
+    else {
+      Write-Host "Oh, you already have infos for this lead !"
+    }
     
     # Change message depending on result
-    if ($lead.Data.length -eq 0) { Write-Host "Sorry, I could not find any $($lead.Type)..." -f Red }
+    if ($lead.Data.count -eq 0) {
+      Write-Host "Sorry, I could not find any $($lead.Type)..." -f Red
+    }
     else {
       Write-Host "I found $($lead.Data.length) $($lead.Type)(s) !" -f Green
       Write-Host "Gathering my discoveries"
 
       # Gather data
-      $lead | add-member -MemberType NoteProperty -Name 'Result' -Value (Complete-Lead -Lead $lead) -Force
+      $lead | add-member -MemberType NoteProperty -Name "Result" -Value (Complete-Lead -Lead $lead) -Force
     }
-
-    $index++
   }
 
-  END { return ($lead | select-object * -ExcludeProperty 'Data') }
+  END {
+    return $lead
+  }
 }

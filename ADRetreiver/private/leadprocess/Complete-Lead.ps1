@@ -26,30 +26,42 @@ function Complete-Lead {
 
   BEGIN {
     $type = $Lead.Type
-    Write-Host "I'm gathering details for $(($Lead.Data -as [array]).length) $type(s)..."
+    $leadDataSize = $Lead.Data.count
+    Write-Host "I'm gathering details for $leadDataSize $type(s)..."
 
-    $res, $index = @(), 0
+    [int]$index = 0
+    [pscustomobject[]]$res = @()
   }
 
   PROCESS {
     foreach ($object in $Lead.Data) {
       $props = $null
-      $name = if ($type -eq "gpo") { $object.DisplayName } else { $object.Name }
+      [string]$name = ($type -eq "gpo") ? $object.DisplayName : $object.Name
 
       # Progress
-      $percent = [math]::Round($index / ($Lead.Data -as [array]).length * 100, 2)
+      [float]$percent = [math]::Round($index / $leadDataSize * 100, 2)
       Write-Progress -Activity "Sniffing $type(s) details..." -Status "$percent% completed..." -CurrentOperation "Currently sniffing $name" -PercentComplete $percent
 
       # Calling appropriate properties formatting function depending on the object type
       try {
         $props = switch ($type) {
-          "group" { Get-GroupDetails -Group $object -RecursiveMembers:($Lead.RecursiveMembers ?? $false) }
-          "gpo" { Get-GPODetails -GPO $object }
-          "ou" { Get-OUDetails -OU $object }
-          default { Get-AccountDetails -Account $object -Type $type }
+          "group" {
+            Get-GroupDetails -Group $object -RecursiveMembers:($Lead.RecursiveMembers ?? $false)
+          }
+          "gpo" {
+            Get-GPODetails -GPO $object
+          }
+          "ou" {
+            Get-OUDetails -OU $object
+          }
+          default {
+            Get-AccountDetails -Account $object -Type $type
+          }
         }
       }
-      catch { Write-Error "Something went wrong for $type n°$index $name : `n$_" }
+      catch {
+        Write-Error "Something went wrong for $type n°$index $name : `n$_"
+      }
 
       $index++
       $res += $props
@@ -58,5 +70,7 @@ function Complete-Lead {
     Write-Progress -Activity "Sniffing $type(s) details..." -Status "100% completed..." -Completed
   }
 
-  END { return $res }
+  END {
+    return $res
+  }
 }

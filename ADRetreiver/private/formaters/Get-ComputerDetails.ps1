@@ -25,28 +25,28 @@ function Get-ComputerDetails {
   )
 
   BEGIN {
-    $os = (($Account.OperatingSystem -split ' ') -replace '[\W]', '') -join ' '
+    [string]$os = (($Account.OperatingSystem -split ' ') -replace '[\W]', '') -join ' '
   }
 
   PROCESS {
     if ($os -and ($os -notmatch "^[a-zA-Z0-9_]+$")) {
 
       if ($os -like "*Windows*") {
-        $osFamily = "Windows"
-        $computerType = !$os ? "Server" : ($os -like "*server*") ? "Server" : "Workstation"
+        [string]$osFamily = "Windows"
+        [string]$computerType = !$os ? "Server" : ($os -like "*server*") ? "Server" : "Workstation"
 
         # Retreiving OS build
         [int]$osBuildNumber = (($Account.OperatingSystemVersion -split ' ')[1].Trim('(', ')'))
 
         # Retreiving build infos from CSV
-        $buildInfos = $WinBuilds.Where({ ($_.build -eq $osBuildNumber) -and ($_.type -eq $computerType) })
+        [object]$buildInfos = $WinBuilds.Where({ ($_.build -eq $osBuildNumber) -and ($_.type -eq $computerType) })[0]
         if (!$buildInfos) {
-          Write-Error -Message "$($Account.Name) build infos not found !"
+          Write-Host -Message "$($Account.Name) build infos not found !" -f Red
           $buildInfos = @{
             OS      = $osFamily
             Name    = $os
             Type    = ""
-            Build   = ""
+            Build   = $osBuildNumber
             Version = ""
             Release = ""
             EOS     = ""
@@ -54,16 +54,20 @@ function Get-ComputerDetails {
           }
         }
 
-        $osShort = ($computerType -eq "Server") ? "Windows Server $($buildInfos.os)" : "Windows $($buildInfos.os)"
+        [string]$osShort = ($computerType -eq "Server") ? "Windows Server $($buildInfos.os)" : "Windows $($buildInfos.os)"
 
         # Retreive windows editions
-        $osEdition = $WinEditions.Where({ ($os -like $_.pattern) })
-        $osEdition = $osEdition ? $osEdition.name : "Standard"
+        $osEdition = $WinEditions.Where({ ($os -like $_.pattern) })[0]
+        [string]$osEdition = $osEdition ? $osEdition.name : "Standard"
 
         # Multiple checks relative to end of support
-        $extendedSupport = $os -match "LTSB|LTSC"
-        $support = ((Get-Days (Get-Date $buildInfos.eos)) -le 0) ? "Ongoing" : ($extendedSupport -and (Get-Days (Get-Date $buildInfos.ltsEos)) -le 0) ? "Extended" : "Retired"
-        $endOfSupportDate = $extendedSupport ? (Get-Date $buildInfos.ltsEos) : (Get-Date $buildInfos.eos)
+        [bool]$extendedSupport = $os -match "LTSB|LTSC"
+        [string]$support = ((Get-Days (Get-Date $buildInfos.eos)) -le 0) ? "Ongoing" : "Retired"
+        if ($extendedSupport -and (Get-Days (Get-Date $buildInfos.ltsEos))) {
+          $support = "Extended"
+        }
+
+        [datetime]$endOfSupportDate = $extendedSupport ? (Get-Date $buildInfos.ltsEos) : (Get-Date $buildInfos.eos)
 
       }
       elseif ($os -like "*Linux*") {
@@ -74,25 +78,29 @@ function Get-ComputerDetails {
       }
 
     }
-    else { $computerType = 'Unknown' }
+    else {
+      $computerType = "Unknown"
+    }
 
     # Add computer properties
-    $newProps = @(
-      @{ n = 'ComputerType'      ; v = $computerType },
-      @{ n = 'OSFamily'          ; v = $osFamily },
-      @{ n = 'OSShort'           ; v = $osShort },
-      @{ n = 'OSFull'            ; v = $os },
-      @{ n = 'OSEdition'         ; v = $osEdition },
-      @{ n = 'OSVersion'         ; v = $buildInfos.Version },
-      @{ n = 'OSBuild'           ; v = $osBuildNumber },
-      @{ n = '@IPv4'             ; v = $Account.IPV4Address },
-      @{ n = 'HasExtendedSupport'; v = $extendedSupport },
-      @{ n = 'Support'           ; v = $support },
-      @{ n = 'EndOfSupportDate'  ; v = $endOfSupportDate }
-    )
+    $newProps = @{
+      ComputerType       = $computerType
+      OSFamily           = $osFamily
+      OSShort            = $osShort
+      OSFull             = $os
+      OSEdition          = $osEdition
+      OSVersion          = $buildInfos.Version
+      OSBuild            = $osBuildNumber
+      "@IPv4"            = $Account.IPV4Address
+      HasExtendedSupport = $extendedSupport
+      Support            = $support
+      EndOfSupportDate   = $endOfSupportDate
+    }
 
-    $Account = Add-Properties $Account $newProps
+    [pscustomobject]$Account = Add-Properties $Account $newProps
   } 
 
-  END { return $Account }
+  END {
+    return $Account
+  }
 }

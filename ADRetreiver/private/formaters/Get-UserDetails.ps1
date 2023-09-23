@@ -26,25 +26,27 @@ function Get-UserDetails {
 
   BEGIN {
     # Name regex
-    $nameReg = "^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$"
+    [regex]$nameReg = "^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$"
   }
 
   PROCESS {
     # Checks if the current account is a privileged account
-    $isAdmin = $ADAdmins.DistinguishedName.Contains($Account.DistinguishedName)
+    [bool]$isAdmin = $ADAdmins.DistinguishedName.Contains($Account.DistinguishedName)
 
     # Check if current account object is a nominative account
-    $isPerson = ($Account.Surname -match $nameReg) -and ($Account.GivenName -match $nameReg) -and !$Account.IsServiceAccount
+    [bool]$isPerson = ($Account.Surname -match $nameReg) -and ($Account.GivenName -match $nameReg) -and !$Account.IsServiceAccount
 
     # Add user properties
-    $newProps = @(
-      @{ n = 'Email'      ; v = ($Account.EmailAddress ? $Account.EmailAddress.ToLower() : $null) },
-      @{ n = 'AccountType'; v = ($isPerson ? "Person" : $Account.IsServiceAccount ? "Service" : "Other") },
-      @{ n = 'Permissions'; v = ($isAdmin ? "Admin" : "Default") }
-    )
+    $newProps = @{
+      Email       = ($Account.EmailAddress ? $Account.EmailAddress.ToLower() : $null)
+      AccountType = ($isPerson ? "Person" : $Account.IsServiceAccount ? "Service" : "Other")
+      Permissions = ($isAdmin ? "Admin" : "Default")
+    }
 
-    $Account = Add-Properties $Account $newProps
+    [pscustomobject]$Account = Add-Properties $Account $newProps
   }
 
-  END { return $Account }
+  END {
+    return $Account
+  }
 }

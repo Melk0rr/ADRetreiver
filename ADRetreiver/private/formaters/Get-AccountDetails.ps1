@@ -24,7 +24,7 @@ function Get-AccountDetails {
       ValueFromPipelineByPropertyName = $false
     )]
     [ValidateNotNullOrEmpty()]
-    [object]  $Account,
+    [pscustomobject]  $Account,
 
     [Parameter(
       Mandatory = $false,
@@ -40,48 +40,61 @@ function Get-AccountDetails {
     if ("user", "computer" -notcontains $Type) { throw "$Type is not a valid account type ! Please use user, or computer" }
 
     # Activity rules
-    $noActivity, $normalActivity, $elevatedActivity, $highActivity, $severeActivity, $criticalActivity = $ADActivityRules
-    $adProps = $ADProperties.Where({ $_.type -eq $Type })
+    $noActivity,
+    $normalActivity,
+    $elevatedActivity,
+    $highActivity,
+    $severeActivity,
+    $criticalActivity = $ADActivityRules
+
+    $adProps = $ADProperties.Where({ $_.type -eq $Type })[0]
   }
 
   PROCESS {
     # Defining basic shared properties
-    $baseProps = @(
-      @{ n = 'SAN'                 ; v = ($Account.SamAccountName) },
-      @{ n = 'DomainName'          ; v = ((Split-DN $Account.DistinguishedName).Domain) },
-      @{ n = 'Status'              ; v = ($Account.Enabled ? "Enabled" : "Disabled") },
-      @{ n = 'CreationDate'        ; v = ($Account.Created) },
-      @{ n = 'LastChangeDate'      ; v = ($Account.Modified) },
-      @{ n = 'IsServiceAccount'    ; v = ($Account.DistinguishedName -like "*OU=Services*") },
-      @{ n = 'LastLogonDelta'      ; v = ($Account.LastLogonDate ? (Get-Days (Get-Date $Account.LastLogonDate)) : -1) },
-      @{ n = 'PasswordLastSetDelta'; v = ($Account.PasswordLastSet ? (Get-Days (Get-Date $Account.PasswordLastSet)) : -1) }
-    )
+    $baseProps = @{
+      SAN                  = ($Account.SamAccountName)
+      DomainName           = ((Split-DN $Account.DistinguishedName).Domain)
+      Status               = ($Account.Enabled ? "Enabled" : "Disabled")
+      CreationDate         = ($Account.Created)
+      LastChangeDate       = ($Account.Modified)
+      IsServiceAccount     = ($Account.DistinguishedName -like "*OU=Services*")
+      LastLogonDelta       = ($Account.LastLogonDate ? (Get-Days (Get-Date $Account.LastLogonDate)) : -1)
+      PasswordLastSetDelta = ($Account.PasswordLastSet ? (Get-Days (Get-Date $Account.PasswordLastSet)) : -1)
+    }
     
     [pscustomobject]$props = Add-Properties ([pscustomobject]$Account) $baseProps
 
     # Retreive password and activity rules described in the appropriate CSV file
-    $pwdRule = $ADPasswordRules.Where({ ($props.PasswordLastSetDelta -ge $_.periodStart) -and ($props.PasswordLastSetDelta -lt $_.periodEnd) })
-    $activityRule = $ADActivityRules.Where({ ($props.LastLogonDelta -ge $_.periodStart) -and ($props.LastLogonDelta -lt $_.periodEnd) })
+    [object]$pwdRule = $ADPasswordRules.Where({ ($props.PasswordLastSetDelta -ge $_.periodStart) -and ($props.PasswordLastSetDelta -lt $_.periodEnd) })[0]
+    [object]$activityRule = $ADActivityRules.Where({ ($props.LastLogonDelta -ge $_.periodStart) -and ($props.LastLogonDelta -lt $_.periodEnd) })[0]
+
+    [bool]$passwordShouldChange = $pwdRule.ShouldChange
+    [int]$activityEnd = $activityRule.periodEnd
 
     # Adding more shared properties: Activity (30d, 90d, 180d, 360d), password status, activity period
-    $hasAlreadyLogged = ($props.LastLogonDelta -gt -1)
-    $activityProps = @(
-      @{ n = 'PasswordShouldBeReset'; v = ([bool]$pwdRule.ShouldCHange) },
-      @{ n = 'ActivityPeriod'       ; v = ([int]$activityRule.periodEnd) },
-      @{ n = 'ActivityRule'         ; v = ($activityRule) },
-      @{ n = 'PwdRule'              ; v = ($pwdRule) }
-    )
+    $activityProps = @{
+      PasswordShouldBeReset = $passwordShouldChange
+      ActivityPeriod        = $activityEnd
+      ActivityRule          = $activityRule
+      PwdRule               = $pwdRule
+      HasLoggedOnce         = ($props.LastLogonDelta -gt -1)
+    }
 
-    $props = Add-Properties $props $activityProps
+    [pscustomobject]$props = Add-Properties $props $activityProps
 
     foreach ($activity in @($normalActivity, $elevatedActivity, $highActivity, $severeActivity)) {
-      $props = Add-Properties $props @{ n = "Active ($($activity.periodEnd)d)"; v = ($hasAlreadyLogged -and ($props.LastLogonDelta -le $activity.periodEnd)) }
+      $activityPropName = "Active ($($activity.periodEnd)d)"
+      $activityPropValue = ($props.LastLogonDelta -le $activity.periodEnd)
+      $props | add-member -MemberType NoteProperty -Name $activityPropName -Value $activityPropValue -Force
     }
 
     # Complete properties with health and type related data
-    $props = ($Type -eq "user") ? (Get-UserDetails $props) : (Get-ComputerDetails $props)
-    $props = Get-Health -Account $props -Type $Type
+    [pscustomobject]$props = ($Type -eq "user") ? (Get-UserDetails $props) : (Get-ComputerDetails $props)
+    [pscustomobject]$props = Get-Health -Account $props -Type $Type
   }
 
-  END { return $props | select-object $adProps.final }
+  END {
+    return $props | select-object $adProps.final
+  }
 }
